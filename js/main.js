@@ -277,6 +277,18 @@
     }).catch(() => {});
   }
 
+  /* ---------- 자주 묻는 질문 ---------- */
+  if (window.IUXCloud?.ready) {
+    IUXCloud.listPosts('faq', { size: 5, full: true, oldestFirst: true }).then(({ items }) => {
+      if (!items.length) return;
+      $('#faqList').innerHTML = items.map(x => `<li><details>
+        <summary><span class="faq__q">Q</span><span class="faq__t">${esc(x.title)}</span><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <div class="faq__a"><span class="faq__q faq__q--a">A</span><div class="md">${IUXCloud.md(x.body)}</div></div>
+      </details></li>`).join('');
+      $('#faq').hidden = false;
+    }).catch(() => {});
+  }
+
   /* ---------- 공지 팝업 ---------- */
   const pop = $('#pop');
   const today = (() => { const t = new Date(); return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`; })();

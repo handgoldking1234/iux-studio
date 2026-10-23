@@ -10,6 +10,7 @@
 ```
 index.html            홈페이지
 notice.html           공지사항 게시판 (목록 · 검색 · 상세)
+faq.html              자주 묻는 질문 (펼침형)
 css/style.css         홈페이지 스타일
 js/content.js         ★ 홈페이지 텍스트 · 이미지 · 연락처 · 팝업 · 연결 설정
 js/main.js            홈페이지 동작 (슬라이더, 메뉴, 포트폴리오, 문의 모달, 팝업)
@@ -18,6 +19,7 @@ js/iux-cloud.js       ★ 모든 고객사 사이트에 넣는 공용 스크립�
 admin/                관리자 페이지 (config.js 에 연결값)
 supabase/migrations/  DB 테이블 · 권한(RLS) — SQL Editor 에서 실행
 supabase/functions/inquiry/  문의 수신 함수 (저장 + 메일 알림 + 스팸/도배 방지)
+supabase/seed/faq.sql FAQ 게시판 + 기본 질문 7개 (SQL Editor 에서 한 번 실행)
 docs/SETUP.md         설정 안내
 ```
 

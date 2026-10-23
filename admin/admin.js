@@ -273,7 +273,7 @@
     if (error) return fail(error);
     $('#pbList').innerHTML = !data.length ? '<p class="empty">아직 글이 없습니다. <b>+ 글쓰기</b>로 첫 글을 올려보세요.</p>' :
       `<table class="tbl"><thead><tr><th>제목</th><th>상태</th><th class="hide-m">조회</th><th>작성일</th></tr></thead><tbody>${data.map(p => `
-        <tr data-id="${p.id}"><td><p class="t-main">${p.pinned ? '<span class="pill pill--new">공지</span> ' : ''}${esc(p.title)}</p></td>
+        <tr data-id="${p.id}"><td><p class="t-main">${p.pinned ? '<span class="pill pill--new">고정</span> ' : ''}${esc(p.title)}</p></td>
         <td>${p.published ? '<span class="pill pill--done">공개</span>' : '<span class="pill">비공개</span>'}</td>
         <td class="hide-m muted">${p.views.toLocaleString()}</td><td class="nowrap muted">${fmtDate(p.created_at)}</td></tr>`).join('')}</tbody></table>${pager(count, PB.page)}`;
   }
@@ -332,13 +332,20 @@
             <div class="cover" id="pCover" role="button" tabindex="0">${p.cover_url ? `<img src="${esc(p.cover_url)}" alt="">` : '클릭해서 이미지 올리기'}</div>
             <button class="linkbtn" id="pCoverDel" type="button"${p.cover_url ? '' : ' hidden'}>대표 이미지 빼기</button>
           </div>
-          <label class="check"><input type="checkbox" id="pPin"${p.pinned ? ' checked' : ''}>상단 고정 (공지)</label>
+          <label class="check" id="pPinLabel"><input type="checkbox" id="pPin"${p.pinned ? ' checked' : ''}>상단 고정 (공지)</label>
           <label class="check"><input type="checkbox" id="pPub"${p.published ? ' checked' : ''}>홈페이지에 공개</label>
           ${id !== 'new' ? `<p class="muted">작성 ${fmtTime(p.created_at)}<br>수정 ${fmtTime(p.updated_at)}<br>조회 ${p.views.toLocaleString()}</p>` : ''}
         </div>
       </div>`;
     const ta = $('#pBody');
     let cover = p.cover_url || '';
+    const faqMode = () => {
+      const faq = boards.find(b => b.slug === $('#pBoard').value)?.kind === 'faq';
+      $('#pTitle').placeholder = faq ? '질문을 입력하세요 (예: 제작 기간은 얼마나 걸리나요?)' : '제목을 입력하세요';
+      ta.placeholder = faq ? '답변을 입력하세요.' : '내용을 입력하세요. 이미지는 이 칸에 끌어다 놓거나 붙여넣을 수 있습니다.';
+      $('#pPinLabel').lastChild.textContent = faq ? '맨 위에 고정' : '상단 고정 (공지)';
+    };
+    $('#pBoard').addEventListener('change', faqMode); faqMode();
     const wrap = (a, b = a, ph = '텍스트') => { const s = ta.selectionStart, e = ta.selectionEnd, t = ta.value.slice(s, e) || ph; ta.setRangeText(a + t + b, s, e, 'select'); ta.focus(); };
     const linePrefix = pre => { const s = ta.value.lastIndexOf('\n', ta.selectionStart - 1) + 1; ta.setRangeText(pre, s, s, 'end'); ta.focus(); };
     const insert = t => { ta.setRangeText(t, ta.selectionStart, ta.selectionEnd, 'end'); ta.focus(); };

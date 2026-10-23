@@ -35,15 +35,15 @@
     return j;
   }
 
-  async function listPosts(board, { page = 1, size = 10, q = '' } = {}) {
+  async function listPosts(board, { page = 1, size = 10, q = '', full = false, oldestFirst = false } = {}) {
     const from = (page - 1) * size;
-    let p = `posts?select=id,title,cover_url,pinned,views,created_at,body&site_id=eq.${enc(cfg.siteId)}&board=eq.${enc(board)}&published=is.true&order=pinned.desc,created_at.desc`;
+    let p = `posts?select=id,title,cover_url,pinned,views,created_at,body&site_id=eq.${enc(cfg.siteId)}&board=eq.${enc(board)}&published=is.true&order=pinned.desc,created_at.${oldestFirst ? 'asc' : 'desc'}`;
     if (q) p += `&title=ilike.${enc('*' + q.replace(/[*,()]/g, ' ') + '*')}`;
     const r = await rest(p, { headers: { Prefer: 'count=exact', Range: `${from}-${from + size - 1}` } });
     if (!r.ok && r.status !== 416) throw new Error('목록을 불러오지 못했습니다.');
     const items = r.status === 416 ? [] : await r.json();
     const total = Number((r.headers.get('content-range') || '*/0').split('/')[1]) || 0;
-    return { items: items.map(x => ({ ...x, excerpt: excerpt(x.body), body: undefined })), total, page, size, pages: Math.max(1, Math.ceil(total / size)) };
+    return { items: items.map(x => ({ ...x, excerpt: excerpt(x.body), body: full ? x.body : undefined })), total, page, size, pages: Math.max(1, Math.ceil(total / size)) };
   }
 
   async function getPost(id) {

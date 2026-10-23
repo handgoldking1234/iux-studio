@@ -2,7 +2,8 @@
   'use strict';
   const S = window.SITE, C = window.IUXCloud;
   const $ = s => document.querySelector(s);
-  const main = $('[data-board]'), board = main.dataset.board;
+  const main = $('[data-board]'), board = main.dataset.board, isFaq = main.dataset.kind === 'faq';
+  const page = location.pathname.split('/').pop() || 'notice.html';
   const list = $('#postList'), pager = $('#pager');
   const fmt = d => d.slice(0, 10).replace(/-/g, '.');
   $('#year').textContent = new Date().getFullYear();
@@ -38,6 +39,7 @@
     $('#searchForm').q.value = q;
     $('#listView').hidden = false; $('#postView').hidden = true;
     msg('불러오는 중…');
+    if (isFaq) return showFaq(q);
     try {
       const r = await C.listPosts(board, { page, size: 10, q });
       if (!r.items.length) return msg(q ? `'${C.esc(q)}' 검색 결과가 없습니다.` : '등록된 글이 없습니다.');
@@ -54,6 +56,23 @@
     } catch (_) { msg('목록을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.'); }
   }
 
+  /* FAQ: 질문을 누르면 답변이 펼쳐지는 목록 */
+  async function showFaq(q) {
+    try {
+      const r = await C.listPosts(board, { size: 100, q, full: true, oldestFirst: true });
+      if (!r.items.length) return msg(q ? `'${C.esc(q)}' 검색 결과가 없습니다.` : '등록된 질문이 없습니다.');
+      list.className = 'faq';
+      list.innerHTML = r.items.map(x => `<li id="q-${x.id}"><details>
+        <summary><span class="faq__q">Q</span><span class="faq__t">${C.esc(x.title)}</span><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></summary>
+        <div class="faq__a"><span class="faq__q faq__q--a">A</span><div class="md">${C.md(x.body)}${admin ? `<p><button type="button" class="btn-write btn-write--sm" data-edit="${x.id}">수정</button></p>` : ''}</div></div>
+      </details></li>`).join('');
+      pager.innerHTML = '';
+      list.addEventListener('click', e => { const b = e.target.closest('[data-edit]'); if (b) toAdmin('#posts/' + b.dataset.edit); });
+      const open = () => { const t = location.hash && document.getElementById('q-' + location.hash.slice(1)); if (t) { t.querySelector('details').open = true; t.scrollIntoView({ block: 'center' }); } };
+      open(); addEventListener('hashchange', open);
+    } catch (_) { msg('목록을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.'); }
+  }
+
   async function showPost(id) {
     $('#listView').hidden = true; $('#postView').hidden = false;
     $('#postTitle').textContent = '불러오는 중…';
@@ -65,7 +84,7 @@
     const cv = $('#postCover'); cv.hidden = !p.cover_url; if (p.cover_url) cv.src = p.cover_url;
     $('#postBody').innerHTML = C.md(p.body);
     if (admin) { const e = $('#editBtn'); e.hidden = false; e.onclick = () => toAdmin('#posts/' + p.id); }
-    if (document.referrer.includes('notice.html') && !document.referrer.includes('id=')) $('#backBtn').href = document.referrer;
+    if (document.referrer.includes(page) && !document.referrer.includes('id=')) $('#backBtn').href = document.referrer;
   }
 
   $('#searchForm').addEventListener('submit', e => {
@@ -75,5 +94,6 @@
   });
 
   const id = new URLSearchParams(location.search).get('id');
+  if (id && isFaq) { location.replace(page + '#' + id); return; }
   id ? showPost(id) : showList();
 })();
