@@ -208,7 +208,7 @@
       <div class="hd__r">
         <button class="iconbtn only-m" data-qopen title="검색">${I('search')}</button>
         <div class="rel" style="margin-right:6px"><button class="iconbtn" data-noti title="알림">${I('bell')}<span class="badge-dot" id="notiDot" hidden></span></button><div id="notiPop"></div></div>
-        <div class="rel"><button class="userbtn" data-user><span class="avatar avatar--round">${esc(A.initial(name))}</span><span class="userbtn__txt"><b>${esc(name)}</b><small>${client ? '사이트 관리자' : '전체 권한'}</small></span><svg class="i i--xs" viewBox="0 0 24 24"><path d="${P.chev}"/></svg></button><div id="userPop"></div></div>
+        <div class="rel"><button class="userbtn" data-user title="내 계정"><span class="avatar avatar--round">${esc(A.initial(name))}</span><span class="userbtn__txt"><b>${esc(name)}</b><small>${client ? '사이트 관리자' : '전체 권한'}</small></span><svg class="i i--xs" viewBox="0 0 24 24"><path d="${P.chev}"/></svg></button><div id="userPop"></div></div>
         <button class="iconbtn" data-logout title="로그아웃">${I('logout')}</button>
       </div>`;
     hd.querySelector('[data-side]').onclick = () => {
@@ -440,6 +440,27 @@
     if (/access_token|type=/.test(location.hash) || !location.hash) history.replaceState(null, '', location.pathname + (A.isClient() ? A.siteHash('dash') : '#/overview'));
     shell(); route(); A.refreshCounts();
   }
+
+  /* ---------- 아이콘 툴팁 (헤더 아이콘 · 접힌 사이드 메뉴) ---------- */
+  (() => {
+    let tipEl, cur;
+    const hide = () => { if (tipEl) tipEl.hidden = true; cur = null; };
+    document.addEventListener('mouseover', e => {
+      const t = e.target.closest?.('#hd [title], #hd [data-tip], .app.is-mini .side [title], .app.is-mini .side [data-tip]');
+      if (!t) return hide();
+      if (t.hasAttribute('title')) { t.dataset.tip = t.title; t.removeAttribute('title'); }
+      if (t === cur) return;
+      if (t.closest('.side') && matchMedia('(max-width:1023px)').matches) return hide();
+      cur = t;
+      if (!tipEl) { tipEl = document.createElement('div'); tipEl.className = 'tip'; document.body.appendChild(tipEl); }
+      tipEl.textContent = t.dataset.tip; tipEl.hidden = false;
+      const r = t.getBoundingClientRect(), w = tipEl.offsetWidth, h = tipEl.offsetHeight, side = !!t.closest('.side');
+      const x = side ? r.right + 10 : Math.min(innerWidth - w - 8, Math.max(8, r.left + r.width / 2 - w / 2));
+      const y = side ? r.top + r.height / 2 - h / 2 : r.bottom + 8;
+      tipEl.className = 'tip' + (side ? ' tip--r' : ''); tipEl.style.left = x + 'px'; tipEl.style.top = y + 'px';
+    });
+    addEventListener('scroll', hide, true); document.addEventListener('mousedown', hide);
+  })();
 
   A.boot = () => {
     if (!CFG.supabaseUrl || !CFG.anonKey) return authScreen('setup', '<code>admin/config.js</code> 에 Supabase Project URL 과 anon key 를 넣어주세요.');
