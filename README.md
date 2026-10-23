@@ -19,7 +19,7 @@ js/iux-cloud.js       ★ 모든 고객사 사이트에 넣는 공용 스크립�
 admin/                관리자 페이지 (config.js 에 연결값)
 supabase/migrations/  DB 테이블 · 권한(RLS) — SQL Editor 에서 실행
 supabase/functions/inquiry/  문의 수신 함수 (저장 + 메일 알림 + 스팸/도배 방지)
-supabase/seed/faq.sql FAQ 게시판 + 기본 질문 7개 (SQL Editor 에서 한 번 실행)
+supabase/seed/faq.sql FAQ 게시판 + 추천 질문 12개 (SQL Editor 에서 실행, 기존 FAQ 는 교체됨)
 docs/SETUP.md         설정 안내
 ```
 
