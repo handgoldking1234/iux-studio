@@ -92,8 +92,8 @@
       .order('pinned', { ascending: false }).order('created_at', { ascending: kind === 'faq' }).range(from, from + PAGE - 1);
     if (error) return A.fail(error);
     const pages = Math.ceil(count / PAGE);
-    $('#pl').innerHTML = !data.length ? `<div class="empty">아직 글이 없습니다. 오른쪽 위 버튼으로 첫 글을 올려보세요.</div>` : `<div class="tbl-wrap"><table class="tbl"><thead><tr><th>${kind === 'faq' ? '질문' : '제목'}</th><th>상태</th><th class="r">조회</th><th>작성일</th></tr></thead><tbody>
-      ${data.map(p => `<tr class="is-link" data-id="${p.id}"><td class="t-main">${p.pinned ? '<span class="tag" style="margin-right:6px">고정</span>' : ''}${esc(p.title)}</td><td>${p.published ? '<span class="pill pill--done">공개</span>' : '<span class="pill">비공개</span>'}</td><td class="r num t2">${A.n(p.views)}</td><td class="t2 nowrap">${A.dot(p.created_at)}</td></tr>`).join('')}</tbody></table></div>
+    $('#pl').innerHTML = !data.length ? `<div class="empty">아직 글이 없습니다. 오른쪽 위 버튼으로 첫 글을 올려보세요.</div>` : `<div class="tbl-wrap"><table class="tbl tbl--center"><thead><tr><th style="width:120px">상태</th><th>${kind === 'faq' ? '질문' : '제목'}</th><th style="width:100px">조회</th><th style="width:140px">작성일</th></tr></thead><tbody>
+      ${data.map(p => `<tr class="is-link" data-id="${p.id}"><td>${p.published ? '<span class="pill pill--done">공개</span>' : '<span class="pill">비공개</span>'}</td><td class="t-main l">${p.pinned ? '<span class="tag" style="margin-right:6px">고정</span>' : ''}${esc(p.title)}</td><td class="num t2">${A.n(p.views)}</td><td class="t2 nowrap">${A.dot(p.created_at)}</td></tr>`).join('')}</tbody></table></div>
       ${pages > 1 ? `<div class="row" style="justify-content:center;padding:16px">${Array.from({ length: pages }, (_, i) => `<button class="chip${i + 1 === B.page ? ' is-on' : ''}" data-page="${i + 1}" style="height:32px;min-width:32px;padding:0 10px">${i + 1}</button>`).join('')}</div>` : ''}`;
   }
   async function editPost(main, id) {

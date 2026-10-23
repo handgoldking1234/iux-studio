@@ -513,3 +513,7 @@ select.inp,.field select,.workcard select{appearance:none;-webkit-appearance:non
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b3b3b3' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")}
 [data-theme="light"] select.inp,[data-theme="light"] .field select,[data-theme="light"] .workcard select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23555b65' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")}
 .vwork select{appearance:none;-webkit-appearance:none;padding:0 26px 0 8px;background:#1f1f1f url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b3b3b3' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 8px center/12px 12px}
+
+/* 가운데 정렬 표 (제목 칸만 왼쪽) */
+.tbl--center th,.tbl--center td{text-align:center}
+.tbl--center td.l{text-align:left}
