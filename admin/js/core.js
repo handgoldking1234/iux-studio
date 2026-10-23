@@ -150,7 +150,9 @@
 
   /* ---------- 데이터 ---------- */
   A.loadSites = async () => {
-    const { data, error } = await A.sb.from('sites').select('id,name,category,domain,stage,manager,color,active,notify_emails,allowed_origins,ops,turnstile_key,created_at,updated_at').order('created_at');
+    const cols = 'id,name,category,domain,stage,manager,color,active,notify_emails,allowed_origins,ops,created_at,updated_at';
+    let { data, error } = await A.sb.from('sites').select(cols + ',turnstile_key').order('created_at');
+    if (error && /turnstile_key/.test(error.message)) ({ data, error } = await A.sb.from('sites').select(cols).order('created_at')); // v3 SQL 실행 전
     if (error) throw error;
     S.sites = data || [];
     if (!S.sites.some(s => s.id === S.siteId)) S.siteId = S.sites[0]?.id || '';
