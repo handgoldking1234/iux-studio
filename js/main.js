@@ -22,7 +22,7 @@
   const info = [['TEL', `<a href="${telHref}">${esc(C.tel)}</a>`], ['EMAIL', `<a href="mailto:${esc(C.email)}">${esc(C.email)}</a>`]];
   if (C.address) info.push(['ADDRESS', esc(C.address)]);
   if (C.bizNo) info.push(['사업자등록번호', esc(C.bizNo)]);
-  $('#footerInfo').innerHTML = info.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
+  const fi = $('#footerInfo'); if (fi) fi.innerHTML = info.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
   $('#year').textContent = new Date().getFullYear();
 
   /* ---------- 헤더 ---------- */

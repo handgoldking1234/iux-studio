@@ -181,13 +181,13 @@ svg{flex:none}
 
 /* footer */
 .footer{background:#000}
-.footer__in{padding-top:64px;padding-bottom:56px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:40px}
+.footer__in{padding-top:56px;padding-bottom:56px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:16px 40px}
 .footer__slogan{margin-top:16px;font-size:15px;color:var(--mute);line-height:1.6}
 .footer__info dl{display:grid;grid-template-columns:auto 1fr;gap:8px 20px;font-size:14px}
 .footer__info dt{color:var(--mute2)}
 .footer__info dd{color:var(--mute)}
 .footer__info dd a:hover{color:var(--blue)}
-.footer__copy{margin-top:24px;font-size:13px;color:var(--mute2)}
+.footer__copy{font-size:13px;color:var(--mute2)}
 
 /* reveal */
 .js-motion [data-reveal]{opacity:0;transform:translateY(80px)}
