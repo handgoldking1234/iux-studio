@@ -15,8 +15,8 @@ window.SITE = {
      docs/SETUP.md 대로 설정한 뒤 Project URL 과 anon public key 를 넣으세요.
      (anon key 는 공개용 키라 홈페이지 코드에 넣어도 안전합니다) */
   cloud: {
-    url: '',        // 예) 'https://abcdefgh.supabase.co'
-    anonKey: '',    // 예) 'eyJhbGciOi...'
+    url: 'https://flrdiplgoeyuvffwxvhq.supabase.co',
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZscmRpcGxnb2V5dXZmZnd4dmhxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI3NTgzNTgsImV4cCI6MjEwODMzNDM1OH0.yNLMwIgvr-f-TwU3fAHuSEC5QjvPp9K3I2T1jkC5UQk',
     siteId: 'iux-studio'
   },
 
