@@ -36,7 +36,8 @@
 |---|---|---|
 | 1 | `supabase/migrations/20261023000000_init.sql` | 사이트 · 문의 · 게시판 · 권한 |
 | 2 | `supabase/migrations/20261024000000_admin_v2.sql` | 슈퍼 어드민 (방문 통계 · 콘텐츠 · SEO · 도메인/호스팅 · 계정) |
-| 3 | `supabase/seed/faq.sql` (선택) | FAQ 게시판 + 추천 질문 |
+| 3 | `supabase/migrations/20261025000000_board_v3.sql` | 일반 게시판 (분류 · 첨부 · 방문자 글쓰기 · 댓글) |
+| 4 | `supabase/seed/faq.sql` (선택) | FAQ 게시판 + 추천 질문 |
 
 각각 `Success` 가 나오면 완료입니다.
 
@@ -149,3 +150,18 @@ cloud: { url: 'https://abcdefgh.supabase.co', anonKey: 'eyJ...', siteId: 'iux-st
 - **검색어**: 네이버 · 구글은 자연 검색어를 사이트에 넘겨주지 않습니다. 서치어드바이저 · 서치콘솔에서 확인하고, 광고 링크에 `utm_term` 을 붙이면 관리자에서 검색어별 유입 · 문의 전환이 집계됩니다.
 - **인증 코드 · GA**: 홈페이지에 스크립트로 적용됩니다. 서치콘솔 인증이 안 되면 'HTML 파일 업로드' 방식을 쓰세요.
 - **사이트맵 · robots.txt · HTTPS** 항목은 설정값만 저장합니다. 실제 파일은 호스팅에 올려야 합니다.
+
+---
+
+## 일반 게시판 · 로봇 방지 (Cloudflare Turnstile)
+
+1. **SQL**: `supabase/migrations/20261025000000_board_v3.sql` 실행 (한 번만)
+2. **함수 배포**: Edge Functions → Deploy a new function → Via Editor → 이름 **`board`**, `supabase/functions/board/index.ts` 붙여넣고 Deploy → Settings 에서 **Verify JWT 끄기**
+3. **Turnstile 키 발급**: https://dash.cloudflare.com 가입 → **Turnstile → Add widget**
+   - Widget name: `iux-cloud`, Hostnames: `handgoldking1234.github.io` (고객사 도메인도 추가), Widget mode: **Managed**
+   - 발급된 **Site Key** → 관리자 **사이트 설정 → 로봇 방지 사이트 키** 에 입력 · 저장
+   - 발급된 **Secret Key** → Supabase **Edge Functions → Secrets** 에 `TURNSTILE_SECRET` 으로 저장
+4. **게시판 만들기**: 사이트 설정 → 게시판 → 추가 → **설정** 에서 분류 · 방문자 글쓰기 · 댓글 · 메뉴 표시
+   - 홈페이지 주소: `board.html?b=게시판주소`
+
+방문자 글은 이름 · 비밀번호로 쓰고 같은 비밀번호로 수정 · 삭제합니다. 관리자는 **게시판** 메뉴에서 모든 글 · 댓글을 숨기거나 삭제하고 관리자 답글을 달 수 있습니다.

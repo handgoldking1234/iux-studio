@@ -175,6 +175,7 @@
           <div class="field">대표 색상<div class="chips" id="clr">${A.TINTS.map(c => `<button type="button" data-clr="${c}" aria-label="${c}" style="width:32px;height:32px;border:0;border-radius:6px;background:${c};box-shadow:${c === s.color ? '0 0 0 2px var(--s1),0 0 0 4px var(--blue)' : 'none'}"></button>`).join('')}</div></div>
           <label class="field">문의 알림 메일 <small>여러 개는 쉼표나 줄바꿈으로 구분</small><textarea name="emails" rows="2" placeholder="owner@client.com">${esc((s.notify_emails || []).join('\n'))}</textarea></label>
           <label class="field">허용 도메인 <small>이 주소에서 온 문의만 받습니다. 비워두면 제한 없음</small><textarea name="origins" rows="2" placeholder="https://client.com">${esc((s.allowed_origins || []).join('\n'))}</textarea></label>
+          <label class="field">로봇 방지 사이트 키 <small>Cloudflare Turnstile 'Site Key' — 방문자 글쓰기 · 댓글에 사용</small><input name="turnstile" value="${esc(s.turnstile_key || '')}" placeholder="0x4AAAAAAA…"></label>
           <label class="check"><input type="checkbox" name="active"${s.active ? ' checked' : ''}>사이트 사용 (끄면 문의 접수 · 콘텐츠 제공 중지)</label>
           <div class="row row--sb"><button type="button" class="btn btn--danger btn--sm" id="del">사이트 삭제</button><div class="row"><button type="button" class="btn btn--line btn--sm" id="ops">도메인 · 호스팅</button><button class="btn btn--primary">저장</button></div></div>
         </form>
@@ -196,7 +197,7 @@
     $('#sf').addEventListener('submit', async e => {
       e.preventDefault(); const f = e.target;
       const row = { name: f.name.value.trim(), domain: f.domain.value.trim().replace(/^https?:\/\//, '').replace(/\/+$/, '') || null, manager: f.manager.value.trim() || null, category: cat, stage, color,
-        notify_emails: split(f.emails.value), allowed_origins: split(f.origins.value).map(o => o.replace(/\/+$/, '')), active: f.active.checked };
+        notify_emails: split(f.emails.value), allowed_origins: split(f.origins.value).map(o => o.replace(/\/+$/, '')), active: f.active.checked, turnstile_key: f.turnstile.value.trim() || null };
       const bad = row.notify_emails.find(m => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(m)); if (bad) return A.toast(`메일 주소를 확인해 주세요: ${bad}`, true);
       const badO = row.allowed_origins.find(o => !/^https?:\/\/[^/]+$/.test(o)); if (badO) return A.toast(`도메인은 https://example.com 형식으로 입력해 주세요: ${badO}`, true);
       const { error } = await A.sb.from('sites').update(row).eq('id', s.id);
@@ -215,11 +216,11 @@
     $('#copy').onclick = () => navigator.clipboard.writeText(snippet).then(() => A.toast('복사했습니다.'));
     const paintBoards = async () => {
       const { data } = await A.sb.from('boards').select('*').eq('site_id', s.id).order('sort').order('created_at');
-      $('#boards').innerHTML = (data || []).length ? data.map(b => `<li><span class="grow"><b>${esc(b.name)}</b><span class="t-sub muted" style="font-size:12px;display:block">${esc(b.slug)} · ${{ list: '일반', faq: 'FAQ', gallery: '갤러리' }[b.kind]}</span></span><button class="btn btn--xs" data-rn="${esc(b.slug)}">이름 변경</button><button class="btn btn--xs btn--danger" data-rm="${esc(b.slug)}">삭제</button></li>`).join('') : '<li class="muted">게시판이 없습니다.</li>';
+      $('#boards').innerHTML = (data || []).length ? data.map(b => `<li><span class="grow"><b>${esc(b.name)}</b><span class="t-sub muted" style="font-size:12px;display:block">${esc(b.slug)} · ${{ list: '일반', faq: 'FAQ', gallery: '갤러리' }[b.kind]}${b.allow_write ? ' · 방문자 글쓰기' : ''}${b.allow_comment ? ' · 댓글' : ''}${b.show_menu ? ' · 메뉴 표시' : ''}</span></span><button class="btn btn--xs" data-cfg="${esc(b.slug)}">설정</button><button class="btn btn--xs btn--danger" data-rm="${esc(b.slug)}">삭제</button></li>`).join('') : '<li class="muted">게시판이 없습니다.</li>';
     };
     $('#boards').onclick = async e => {
-      const rn = e.target.closest('[data-rn]'), rm = e.target.closest('[data-rm]');
-      if (rn) { const n = prompt('새 게시판 이름'); if (!n) return; const { error } = await A.sb.from('boards').update({ name: n.trim() }).eq('site_id', s.id).eq('slug', rn.dataset.rn); error ? A.fail(error) : paintBoards(); }
+      const cfg = e.target.closest('[data-cfg]'), rm = e.target.closest('[data-rm]');
+      if (cfg) { const { data } = await A.sb.from('boards').select('*').eq('site_id', s.id).eq('slug', cfg.dataset.cfg).single(); A.boardSettings(data, paintBoards); }
       if (rm) { if (!A.confirm(`'${rm.dataset.rm}' 게시판과 글이 모두 삭제됩니다. 계속할까요?`)) return; const { error } = await A.sb.from('boards').delete().eq('site_id', s.id).eq('slug', rm.dataset.rm); error ? A.fail(error) : paintBoards(); }
     };
     $('#bf').addEventListener('submit', async e => {
@@ -241,6 +242,30 @@
       e.target.reset(); paintMembers(); A.toast('담당자를 추가했습니다.');
     });
     paintBoards(); paintMembers();
+  };
+
+  /* =============== 게시판 설정 (사이트 설정 · 게시판 화면에서 공통 사용) =============== */
+  A.boardSettings = (b, done) => {
+    const gen = b.kind === 'list';
+    const m = A.modal({ title: `${b.name} 게시판 설정`, body: `
+      <div class="grid g2"><label class="field">게시판 이름<input name="name" value="${esc(b.name)}" maxlength="30"></label><label class="field">주소 <small>변경 불가</small><input value="${esc(b.slug)}" readonly></label></div>
+      <label class="field">종류<select name="kind">${[['list', '일반 게시판'], ['faq', 'FAQ'], ['gallery', '갤러리']].map(([k, l]) => `<option value="${k}"${b.kind === k ? ' selected' : ''}>${l}</option>`).join('')}</select></label>
+      <label class="field">분류 <small>쉼표로 구분 (예: 질문, 후기, 자료). 비워두면 분류 없음</small><input name="cats" value="${esc((b.categories || []).join(', '))}" placeholder="질문, 후기, 자료"></label>
+      <div class="note" style="display:flex;flex-direction:column;gap:12px">
+        <label class="check"><input type="checkbox" name="w"${b.allow_write ? ' checked' : ''}>방문자 글쓰기 허용 <small class="muted" style="font-weight:400">이름 · 비밀번호로 작성, 비밀번호로 수정 · 삭제</small></label>
+        <label class="check"><input type="checkbox" name="c"${b.allow_comment ? ' checked' : ''}>댓글 · 대댓글 허용</label>
+        <label class="check"><input type="checkbox" name="m"${b.show_menu ? ' checked' : ''}>홈페이지 메뉴에 표시</label>
+        <small class="muted">방문자 글쓰기 · 댓글은 로봇 방지(사이트 설정의 Turnstile 키)가 있어야 동작합니다.</small></div>
+      <p class="muted" style="font-size:12px">홈페이지 주소: <code>board.html?b=${esc(b.slug)}</code></p>`,
+      foot: `<button class="btn" data-x>취소</button><button class="btn btn--primary" data-save>저장</button>` });
+    void gen;
+    m.el.querySelector('[data-save]').onclick = async () => {
+      const g = n => m.el.querySelector(`[name=${n}]`);
+      const row = { name: g('name').value.trim() || b.name, kind: g('kind').value, categories: g('cats').value.split(',').map(x => x.trim()).filter(Boolean).slice(0, 20), allow_write: g('w').checked, allow_comment: g('c').checked, show_menu: g('m').checked };
+      const { error } = await A.sb.from('boards').update(row).eq('site_id', b.site_id).eq('slug', b.slug);
+      if (error) return A.fail(error);
+      m.close(); A.toast('게시판 설정을 저장했습니다.'); done?.();
+    };
   };
 
   /* =============== 내 정보 · 비밀번호 =============== */

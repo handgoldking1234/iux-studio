@@ -60,23 +60,68 @@
     box.innerHTML = `<div class="row row--sb" style="margin-bottom:16px"><div class="seg">${[['visual', '화면에서 편집'], ['form', '입력 폼']].map(([k, l]) => `<button data-mode="${k}" class="${E.mode === k ? 'is-on' : ''}">${l}</button>`).join('')}</div>
       <span class="muted" style="font-size:13px">${E.mode === 'visual' ? '글자를 클릭해 바로 고치고, 이미지는 끌어다 놓아 바꾸세요.' : '항목별로 입력해 수정합니다.'}</span></div>
       <div id="mainEd"></div>
+      <div id="secEd"></div>
       <div class="card card__pad" style="margin-top:24px"><div class="card__h"><h2>회사 정보 (푸터)</h2></div><div class="grid g4" id="co">
         ${[['name', '회사명', 'IUX.studio'], ['ceo', '대표자', '홍길동'], ['bizNo', '사업자등록번호', '000-00-00000'], ['tel', '대표 전화', '02-000-0000'], ['email', '이메일', 'hello@example.com'], ['address', '주소', '서울시 …']].map(([k, l, ph]) => `<label class="field">${l}<input data-co="${k}" value="${esc(d.company[k] || '')}" placeholder="${ph}"></label>`).join('')}</div></div>`;
     box.querySelector('.seg').onclick = e => { const b = e.target.closest('[data-mode]'); if (b) { E.mode = b.dataset.mode; paintMain(box); } };
     $('#co').oninput = e => { const k = e.target.dataset.co; if (k) set(d => { d.company[k] = e.target.value; }); };
     (E.mode === 'visual' ? visual : form)($('#mainEd'));
+    sectionsEd($('#secEd'));
+  }
+
+  /* ---------- 섹션 문구: 띠 문구 · 서비스 · 프로세스 · 선택 이유 · 문의 배너 ---------- */
+  const DEF = {
+    marquee: ['기업 홈페이지', '브랜드 사이트', '병원 홈페이지', '랜딩페이지', '쇼핑몰', '반응형 리뉴얼', '유지보수', 'UI · UX', 'SEO'],
+    services: [{ t: '기업 홈페이지', d: '첫인상으로 신뢰를 얻는 얼굴' }, { t: '브랜드 사이트', d: '브랜드의 분위기를 온전히 담는 공간' }, { t: '쇼핑몰 · 랜딩', d: '둘러보다 문의·구매까지 이어지는 흐름' }, { t: '리뉴얼 · 유지보수', d: '오픈 다음 날부터 시작되는 관리' }],
+    process: { eyebrow: 'PROCESS', title: '보기 좋은 화면보다\n움직이는 결과를 봅니다.', lead: '디자인에 앞서 고객이 어디서 멈추고 클릭하는지를 설계합니다.', steps: [{ t: '기획 · 구조 설계', d: '방문자의 동선을 먼저 그립니다' }, { t: 'UI · UX 디자인', d: '첫 화면에서 브랜드가 읽히게' }, { t: '개발 · 오픈 · 운영', d: '어떤 기기에서도 매끄럽게 오픈' }] },
+    about: { eyebrow: 'WHY IUX.STUDIO', title: '결과가 다른 데는\n이유가 있습니다.', items: [{ t: '정리가 안 돼도\n시작할 수 있습니다.', d: '흩어진 정보를 모아 사이트 구조로 엮어드립니다.' }, { t: '한 팀이\n끝까지 만듭니다.', d: '담당이 바뀌지 않아 처음 의도가 흐려지지 않습니다.' }, { t: '어떤 화면에서도\n가볍게 열립니다.', d: 'PC부터 모바일까지 속도와 사용성을 함께 챙깁니다.' }, { t: '오픈은 끝이 아니라\n시작입니다.', d: '업데이트와 유지보수로 계속 함께 운영합니다.' }] },
+    cta: { title: 'IUX.STUDIO와 함께\n프로젝트를 시작해보세요' }
+  };
+  function sectionsEd(el) {
+    const d = E.draft;
+    // 저장된 값이 없으면 기본 문구를 보여주고, 고치는 순간 draft 에 들어갑니다.
+    const sec = A.clone({ ...DEF, ...(d.sections || {}) }), mq = d.marquee?.length ? d.marquee : DEF.marquee;
+    const commit = () => set(dd => { dd.sections = A.clone(sec); });
+    const rows = (key, list, l1, l2, multi) => `<div class="stack" style="gap:10px" data-list="${key}">${list.map((v, i) => `<div class="block" data-i="${i}"><b>${i + 1}</b><div class="stack" style="gap:8px">${multi ? `<textarea class="inp" rows="2" data-k="t" placeholder="${l1}">${esc(v.t)}</textarea>` : `<input class="inp" data-k="t" value="${esc(v.t)}" placeholder="${l1}" style="font-weight:700">`}<input class="inp" data-k="d" value="${esc(v.d)}" placeholder="${l2}"></div><div class="stack" style="gap:4px"><button class="iconbtn" data-up title="위로" ${i ? '' : 'disabled'}>${I('up', 'i--sm')}</button><button class="iconbtn" data-del title="삭제" style="color:var(--neg)">${I('x', 'i--sm')}</button></div></div>`).join('')}<button class="btn btn--line btn--sm" data-add="${key}" style="align-self:flex-start">+ 항목 추가</button></div>`;
+    el.innerHTML = `<div class="card card__pad" style="margin-top:24px"><div class="card__h"><h2>섹션 문구</h2><small>홈페이지 메인의 나머지 영역</small></div>
+      <div class="chips" id="secTabs" style="margin-bottom:20px">${[['mq', '흐르는 띠 문구'], ['svc', '서비스'], ['pr', '프로세스'], ['ab', '선택 이유'], ['cta', '문의 배너']].map(([k, l]) => `<button class="chip${(E.secTab || 'mq') === k ? ' is-on' : ''}" data-st="${k}">${l}</button>`).join('')}</div>
+      <div id="secBody"></div></div>`;
+    const body = $('#secBody', el), tab = E.secTab || 'mq';
+    if (tab === 'mq') body.innerHTML = `<label class="field">띠에 흐르는 문구 <small>한 줄에 하나씩</small><textarea rows="6" id="mqT">${esc(mq.join('\n'))}</textarea></label>`;
+    if (tab === 'svc') body.innerHTML = rows('services', sec.services, '서비스 이름', '한 줄 설명');
+    if (tab === 'pr') body.innerHTML = `<div class="grid g2" style="margin-bottom:16px"><label class="field">작은 제목<input data-f="process.eyebrow" value="${esc(sec.process.eyebrow)}"></label><label class="field">설명<input data-f="process.lead" value="${esc(sec.process.lead)}"></label></div><label class="field" style="margin-bottom:16px">큰 제목 <small>줄바꿈 그대로 표시</small><textarea rows="2" data-f="process.title">${esc(sec.process.title)}</textarea></label><p class="sec-t">단계</p>${rows('process.steps', sec.process.steps, '단계 이름', '한 줄 설명')}`;
+    if (tab === 'ab') body.innerHTML = `<div class="grid g2" style="margin-bottom:16px"><label class="field">작은 제목<input data-f="about.eyebrow" value="${esc(sec.about.eyebrow)}"></label><label class="field">큰 제목<textarea rows="2" data-f="about.title">${esc(sec.about.title)}</textarea></label></div><p class="sec-t">카드</p>${rows('about.items', sec.about.items, '카드 제목 (줄바꿈 가능)', '설명', true)}`;
+    if (tab === 'cta') body.innerHTML = `<label class="field">문의 배너 문구 <small>줄바꿈 그대로 표시</small><textarea rows="2" data-f="cta.title">${esc(sec.cta.title)}</textarea></label>`;
+    $('#secTabs', el).onclick = e => { const b = e.target.closest('[data-st]'); if (b) { E.secTab = b.dataset.st; sectionsEd(el); } };
+    const path = k => k.split('.').reduce((o, x) => o[x], sec);
+    body.addEventListener('input', e => {
+      if (e.target.id === 'mqT') return set(dd => { dd.marquee = e.target.value.split('\n').map(x => x.trim()).filter(Boolean); });
+      const f = e.target.dataset.f; if (f) { const [a, b] = f.split('.'); sec[a][b] = e.target.value; return commit(); }
+      const li = e.target.closest('[data-list]'), it = e.target.closest('[data-i]'), k = e.target.dataset.k;
+      if (li && it && k) { path(li.dataset.list)[+it.dataset.i][k] = e.target.value; commit(); }
+    });
+    body.addEventListener('click', e => {
+      const add = e.target.closest('[data-add]'); if (add) { path(add.dataset.add).push({ t: '', d: '' }); commit(); return sectionsEd(el); }
+      const li = e.target.closest('[data-list]'), it = e.target.closest('[data-i]'); if (!li || !it) return;
+      const arr = path(li.dataset.list), i = +it.dataset.i;
+      if (e.target.closest('[data-del]')) { arr.splice(i, 1); commit(); sectionsEd(el); }
+      if (e.target.closest('[data-up]') && i) { [arr[i - 1], arr[i]] = [arr[i], arr[i - 1]]; commit(); sectionsEd(el); }
+    });
   }
   function visual(el) {
     const d = E.draft, h = d.hero[E.slide];
     el.innerHTML = `<div class="preview"><div class="preview__bar"><i></i><i></i><i></i><span>${esc(siteUrl() === '#' ? 'https://example.com' : siteUrl())}</span></div>
       <div class="vhero">${A.dropHTML(h.img, '배경 이미지를 끌어다 놓기')}
         <div class="vhero__copy"><p class="vhero__cat" contenteditable="plaintext-only" data-f="cat">${esc(h.cat)}</p><h2 class="vhero__title" contenteditable="plaintext-only" data-f="title">${esc(h.title)}</h2><p class="vhero__desc" contenteditable="plaintext-only" data-f="desc">${esc(h.desc)}</p></div>
+        <div class="vhero__link"><span>${I('ext', 'i--sm')}</span><input data-hl value="${esc(h.link || '')}" placeholder="버튼 링크 (비우면 버튼 없음)"><input data-hb value="${esc(h.btn || '')}" placeholder="MORE VIEW" style="width:120px"></div>
         <div class="vhero__dots">${d.hero.map((_, i) => `<button data-s="${i}" class="${i === E.slide ? 'is-on' : ''}">${i + 1}</button>`).join('')}<button data-add title="슬라이드 추가">+</button></div></div>
       <div class="vsec"><div class="row row--sb" style="margin-bottom:20px"><h3 style="margin:0">포트폴리오</h3><button class="btn btn--sm" data-wadd style="background:#1f1f1f;color:#fff">항목 추가</button></div>
         <div class="grid g4">${d.works.map((w, i) => `<div class="vwork" data-w="${i}">${A.dropHTML(w.img, '이미지 끌어다 놓기')}<div class="row"><span contenteditable="plaintext-only" data-wn>${esc(w.name)}</span><select data-wc>${WORK_CATS.map(c => `<option${c === w.cat ? ' selected' : ''}>${c}</option>`).join('')}</select></div></div>`).join('')}</div>
         ${d.works.length ? '' : '<p class="muted" style="font-size:13px">항목 추가로 작업물을 넣어보세요.</p>'}</div></div>`;
     const heroDrop = el.querySelector('.vhero .drop');
     A.bindDrop(heroDrop, url => { set(d => { d.hero[E.slide].img = url; }); visual(el); });
+    el.querySelector('[data-hl]').addEventListener('input', e => set(d => { d.hero[E.slide].link = e.target.value.trim(); }));
+    el.querySelector('[data-hb]').addEventListener('input', e => set(d => { d.hero[E.slide].btn = e.target.value; }));
     el.querySelectorAll('.vhero [data-f]').forEach(n => n.addEventListener('input', () => set(d => { d.hero[E.slide][n.dataset.f] = n.innerText.replace(/\n{3,}/g, '\n\n').trim(); })));
     el.querySelector('.vhero__dots').onclick = e => {
       const s = e.target.closest('[data-s]'); if (s) { E.slide = +s.dataset.s; visual(el); }
@@ -98,6 +143,8 @@
     el.innerHTML = `<div class="card card__pad" style="margin-bottom:24px"><div class="card__h"><h2>히어로 슬라이드</h2><button class="btn btn--line btn--sm" data-hadd>슬라이드 추가</button></div>
       <div class="grid g3" style="gap:16px">${d.hero.map((h, i) => `<div class="slidecard" data-h="${i}">${A.dropHTML(h.img, '슬라이드 이미지를 끌어다 놓기')}
         <label class="field">카테고리<input data-f="cat" value="${esc(h.cat)}"></label><label class="field">제목<textarea data-f="title" rows="2">${esc(h.title)}</textarea></label><label class="field">설명<textarea data-f="desc" rows="3">${esc(h.desc)}</textarea></label>
+        <div class="grid g2" style="gap:8px"><label class="field">링크 <small>비우면 버튼 없음</small><input data-f="link" value="${esc(h.link || '')}" placeholder="#works, https://…"></label><label class="field">버튼 문구<input data-f="btn" value="${esc(h.btn || '')}" placeholder="MORE VIEW"></label></div>
+        <label class="check" style="font-size:13px"><input type="checkbox" data-nt${h.newTab ? ' checked' : ''}>새 창으로 열기</label>
         ${d.hero.length > 1 ? `<button class="btn btn--danger btn--xs" data-hdel style="align-self:flex-end">슬라이드 삭제</button>` : ''}</div>`).join('')}</div></div>
       <div class="card card__pad"><div class="card__h"><h2>포트폴리오</h2><button class="btn btn--line btn--sm" data-wadd>항목 추가</button></div>
       <div class="grid g4" style="gap:16px">${d.works.map((w, i) => `<div class="workcard" data-w="${i}">${A.dropHTML(w.img, '이미지 끌어다 놓기')}<input class="inp" data-f="name" value="${esc(w.name)}" placeholder="프로젝트명"><input class="inp" data-f="link" value="${esc(w.link || '')}" placeholder="사이트 주소 (선택)">
@@ -109,6 +156,7 @@
       const i = +c.dataset.h;
       A.bindDrop(c.querySelector('.drop'), url => { set(d => { d.hero[i].img = url; }); form(el); });
       c.addEventListener('input', e => { const f = e.target.dataset.f; if (f) set(d => { d.hero[i][f] = e.target.value; }); });
+      c.querySelector('[data-nt]').addEventListener('change', e => set(d => { d.hero[i].newTab = e.target.checked; }));
       c.querySelector('[data-hdel]')?.addEventListener('click', () => { set(d => d.hero.splice(i, 1)); E.slide = 0; form(el); });
     });
     el.querySelectorAll('[data-w]').forEach(c => {

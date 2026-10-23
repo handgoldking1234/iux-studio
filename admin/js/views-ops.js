@@ -78,44 +78,83 @@
     const boards = await loadBoards();
     if (!boards.length) { main.innerHTML = `${A.siteHead('게시판')}<div class="card empty">게시판이 없습니다.${A.isClient() ? '' : ` <a href="${A.siteHash('settings')}" style="color:var(--blue)">사이트 설정</a>에서 게시판을 추가하세요.`}</div>`; return A.bindHead(main); }
     if (!boards.some(b => b.slug === B.board)) { B.board = boards[0].slug; B.page = 1; }
-    const kind = boards.find(b => b.slug === B.board).kind;
-    main.innerHTML = `${A.siteHead('게시판', { extra: `<a class="btn btn--primary" href="${A.siteHash('board')}/new">${I('plus', 'i--sm')}${kind === 'faq' ? '질문 추가' : '글쓰기'}</a>` })}
+    B.cur = boards.find(b => b.slug === B.board); const kind = B.cur.kind;
+    main.innerHTML = `${A.siteHead('게시판', { extra: `<div class="row">${A.isClient() ? '' : `<button class="btn btn--line" id="bset">${I('settings', 'i--sm')}게시판 설정</button>`}<a class="btn btn--primary" href="${A.siteHash('board')}/new">${I('plus', 'i--sm')}${kind === 'faq' ? '질문 추가' : '글쓰기'}</a></div>` })}
       <div class="chips" style="margin-bottom:20px" id="bt">${boards.map(b => `<button class="chip${b.slug === B.board ? ' is-on' : ''}" data-b="${esc(b.slug)}">${esc(b.name)}</button>`).join('')}</div><div class="card" id="pl"><p class="loading">불러오는 중…</p></div>`;
     A.bindHead(main);
+    $('#bset')?.addEventListener('click', () => A.boardSettings(B.cur, () => V['site:board'](main)));
     $('#bt').onclick = e => { const b = e.target.closest('[data-b]'); if (!b) return; B.board = b.dataset.b; A.store.set('iuxc-board', B.board); B.page = 1; V['site:board'](main); };
     $('#pl').onclick = e => { const pg = e.target.closest('[data-page]'); if (pg) { B.page = +pg.dataset.page; return list(kind); } const tr = e.target.closest('[data-id]'); if (tr) A.go(`${A.siteHash('board')}/${tr.dataset.id}`); };
     list(kind);
   };
+  const isGeneral = b => b && b.kind === 'list' && b.slug !== 'notice';
   async function list(kind) {
+    const bd = B.cur, gen = isGeneral(bd), cats = bd?.categories?.length;
     const from = (B.page - 1) * PAGE;
-    const { data, count, error } = await A.sb.from('posts').select('id,title,pinned,published,views,created_at', { count: 'exact' }).eq('site_id', S.siteId).eq('board', B.board)
+    const { data, count, error } = await A.sb.from('posts').select('id,title,pinned,published,views,created_at,category,author_name,is_admin,comment_count,attachments', { count: 'exact' }).eq('site_id', S.siteId).eq('board', B.board)
       .order('pinned', { ascending: false }).order('created_at', { ascending: kind === 'faq' }).range(from, from + PAGE - 1);
     if (error) return A.fail(error);
     const pages = Math.ceil(count / PAGE);
-    $('#pl').innerHTML = !data.length ? `<div class="empty">아직 글이 없습니다. 오른쪽 위 버튼으로 첫 글을 올려보세요.</div>` : `<div class="tbl-wrap"><table class="tbl tbl--center"><thead><tr><th style="width:120px">상태</th><th>${kind === 'faq' ? '질문' : '제목'}</th><th style="width:100px">조회</th><th style="width:140px">작성일</th></tr></thead><tbody>
-      ${data.map(p => `<tr class="is-link" data-id="${p.id}"><td>${p.published ? '<span class="pill pill--done">공개</span>' : '<span class="pill">비공개</span>'}</td><td class="t-main l">${p.pinned ? '<span class="tag" style="margin-right:6px">고정</span>' : ''}${esc(p.title)}</td><td class="num t2">${A.n(p.views)}</td><td class="t2 nowrap">${A.dot(p.created_at)}</td></tr>`).join('')}</tbody></table></div>
+    $('#pl').innerHTML = !data.length ? `<div class="empty">아직 글이 없습니다. 오른쪽 위 버튼으로 첫 글을 올려보세요.</div>` : `<div class="tbl-wrap"><table class="tbl tbl--center"><thead><tr><th style="width:110px">상태</th>${cats ? '<th style="width:110px">분류</th>' : ''}<th>${kind === 'faq' ? '질문' : '제목'}</th>${gen ? '<th style="width:140px">작성자</th>' : ''}<th style="width:90px">조회</th><th style="width:130px">작성일</th></tr></thead><tbody>
+      ${data.map(p => `<tr class="is-link" data-id="${p.id}"><td>${p.published ? '<span class="pill pill--done">공개</span>' : '<span class="pill">숨김</span>'}</td>${cats ? `<td class="t2">${esc(p.category || '-')}</td>` : ''}
+        <td class="t-main l">${p.pinned ? '<span class="tag" style="margin-right:6px">고정</span>' : ''}${esc(p.title)}${p.comment_count ? ` <span style="color:var(--blue)">[${p.comment_count}]</span>` : ''}${(p.attachments || []).length ? ' <span class="muted" title="첨부파일">📎</span>' : ''}</td>
+        ${gen ? `<td class="t2">${esc(p.author_name || (p.is_admin ? '관리자' : '-'))}${p.is_admin ? '' : ' <span class="tag tag--off">방문자</span>'}</td>` : ''}<td class="num t2">${A.n(p.views)}</td><td class="t2 nowrap">${A.dot(p.created_at)}</td></tr>`).join('')}</tbody></table></div>
       ${pages > 1 ? `<div class="row" style="justify-content:center;padding:16px">${Array.from({ length: pages }, (_, i) => `<button class="chip${i + 1 === B.page ? ' is-on' : ''}" data-page="${i + 1}" style="height:32px;min-width:32px;padding:0 10px">${i + 1}</button>`).join('')}</div>` : ''}`;
   }
+
+  /* 관리자 첨부파일 업로드 (files 버킷) */
+  const EXT = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'hwp', 'hwpx', 'zip', 'txt'];
+  async function uploadFile(f, postKey) {
+    const ext = (f.name.split('.').pop() || '').toLowerCase();
+    if (!EXT.includes(ext)) throw new Error(`허용되지 않는 형식입니다: ${f.name}`);
+    if (f.size > 10 * 1024 * 1024) throw new Error(`10MB 이하만 올릴 수 있습니다: ${f.name}`);
+    const type = /^(image\/(jpeg|png|gif|webp)|application\/pdf|text\/plain|application\/zip)$/.test(f.type) ? f.type : 'application/octet-stream';
+    const path = `${S.siteId}/board/${postKey}/${crypto.randomUUID()}.${ext}`;
+    const { error } = await A.sb.storage.from('files').upload(path, f, { contentType: type, cacheControl: '31536000' });
+    if (error) throw error;
+    return { name: f.name, size: f.size, type, path, url: A.sb.storage.from('files').getPublicUrl(path).data.publicUrl };
+  }
+  const fsize = n => n > 1048576 ? (n / 1048576).toFixed(1) + 'MB' : Math.max(1, Math.round(n / 1024)) + 'KB';
+
   async function editPost(main, id) {
     const boards = await loadBoards();
-    let p = { title: '', body: '', cover_url: '', pinned: false, published: true, board: B.board || boards[0]?.slug, site_id: S.siteId };
+    const me = S.user.user_metadata?.name || '관리자';
+    let p = { title: '', body: '', cover_url: '', pinned: false, published: true, board: B.board || boards[0]?.slug, site_id: S.siteId, category: '', author_name: me, is_admin: true, attachments: [] };
     if (id !== 'new') { const { data, error } = await A.sb.from('posts').select('*').eq('id', id).single(); if (error) throw error; p = data; }
     if (!boards.length) return A.go(A.siteHash('board'));
-    const kindOf = slug => boards.find(b => b.slug === slug)?.kind;
+    const bOf = slug => boards.find(b => b.slug === slug);
+    let atts = [...(p.attachments || [])]; const postKey = id === 'new' ? crypto.randomUUID() : id;
     main.innerHTML = `${A.siteHead(id === 'new' ? '글쓰기' : '글 수정', { open: false, extra: `<div class="row"><a class="btn btn--line" href="${A.siteHash('board')}">목록</a>${id !== 'new' ? '<button class="btn btn--danger" id="pdel">삭제</button>' : ''}<button class="btn btn--primary" id="psave">저장</button></div>` })}
-      <div class="editor"><div class="card card__pad"><input class="editor__title" id="pt" maxlength="200" value="${esc(p.title)}">
+      <div class="editor"><div class="stack" style="gap:16px"><div class="card card__pad"><input class="editor__title" id="pt" maxlength="200" value="${esc(p.title)}">
         <div class="toolbar" id="tb"><button data-md="h">제목</button><button data-md="b"><b>B</b></button><button data-md="i"><i>I</i></button><button data-md="ul">• 목록</button><button data-md="q">인용</button><button data-md="link">링크</button><button data-md="img">이미지</button><span class="sp"></span><button data-md="pv" id="pvb">미리보기</button></div>
         <textarea class="body" id="pb">${esc(p.body)}</textarea><div class="md" id="pp" hidden style="min-height:440px;padding:8px 2px"></div></div>
+        <div class="card card__pad" id="attBox"><div class="card__h"><h2>첨부파일</h2><small>이미지 · PDF · 한글 · 오피스 · ZIP, 파일당 10MB, 최대 5개</small></div><ul class="list" id="atl"></ul><div class="row" style="margin-top:12px"><button class="btn btn--line btn--sm" id="atAdd">${I('plus', 'i--sm')}파일 추가</button></div></div>
+        <div id="cmBox"></div></div>
         <div class="card card__pad stack" style="gap:18px"><label class="field">게시판<select id="pbd">${boards.map(b => `<option value="${esc(b.slug)}"${b.slug === p.board ? ' selected' : ''}>${esc(b.name)}</option>`).join('')}</select></label>
-          <div class="field">대표 이미지 <small>목록 · 공유용 (선택)</small><div id="pc">${A.dropHTML(p.cover_url, '클릭하거나 끌어다 놓기')}</div></div>
+          <label class="field" id="pcatW">분류<select id="pcat"></select></label>
+          <label class="field" id="pauW">작성자<input id="pau" value="${esc(p.author_name || (p.is_admin ? me : ''))}" maxlength="30"${p.is_admin ? '' : ' readonly'}>${p.is_admin ? '' : '<small>방문자가 쓴 글입니다.</small>'}</label>
+          <div class="field">대표 이미지 <small>목록 · 공유용 (선택)</small><div id="pc"></div></div>
           <label class="check"><input type="checkbox" id="ppin"${p.pinned ? ' checked' : ''}><span id="ppinl">상단 고정</span></label>
           <label class="check"><input type="checkbox" id="ppub"${p.published ? ' checked' : ''}>홈페이지에 공개</label>
           ${id !== 'new' ? `<p class="muted" style="font-size:12px;line-height:1.8">작성 ${A.dtime(p.created_at)}<br>수정 ${A.dtime(p.updated_at)}<br>조회 ${A.n(p.views)}</p>` : ''}</div></div>`;
     const ta = $('#pb'); let cover = p.cover_url || '';
-    const labels = () => { const faq = kindOf($('#pbd').value) === 'faq'; $('#pt').placeholder = faq ? '질문을 입력하세요 (예: 제작 기간은 얼마나 걸리나요?)' : '제목을 입력하세요'; ta.placeholder = faq ? '답변을 입력하세요.' : '내용을 입력하세요. 이미지는 이 칸에 끌어다 놓거나 붙여넣을 수 있습니다.'; $('#ppinl').textContent = faq ? '맨 위에 고정' : '상단 고정 (공지)'; };
+    const labels = () => {
+      const b = bOf($('#pbd').value), faq = b?.kind === 'faq', gen = isGeneral(b);
+      $('#pt').placeholder = faq ? '질문을 입력하세요 (예: 제작 기간은 얼마나 걸리나요?)' : '제목을 입력하세요';
+      ta.placeholder = faq ? '답변을 입력하세요.' : '내용을 입력하세요. 이미지는 이 칸에 끌어다 놓거나 붙여넣을 수 있습니다.';
+      $('#ppinl').textContent = faq ? '맨 위에 고정' : '상단 고정 (공지)';
+      $('#pcatW').hidden = !b?.categories?.length; $('#pcat').innerHTML = `<option value="">분류 없음</option>${(b?.categories || []).map(c => `<option${c === p.category ? ' selected' : ''}>${esc(c)}</option>`).join('')}`;
+      $('#pauW').hidden = !gen; $('#attBox').hidden = faq;
+    };
     $('#pbd').onchange = labels; labels();
     const drawCover = () => { $('#pc').innerHTML = A.dropHTML(cover, '클릭하거나 끌어다 놓기'); $('#pc .drop').style.aspectRatio = '16/9'; A.bindDrop($('#pc .drop'), u => { cover = u; drawCover(); }); };
     drawCover();
+    const drawAtts = () => { $('#atl').innerHTML = atts.length ? atts.map((a, i) => `<li><span class="grow"><a href="${esc(a.url)}" target="_blank" rel="noopener">📎 ${esc(a.name)}</a> <small class="muted">${fsize(a.size || 0)}</small></span><button class="btn btn--xs btn--danger" data-rm="${i}">빼기</button></li>`).join('') : '<li class="muted">첨부파일이 없습니다.</li>'; $('#atAdd').disabled = atts.length >= 5; };
+    drawAtts();
+    $('#atl').onclick = e => { const b = e.target.closest('[data-rm]'); if (b) { atts.splice(+b.dataset.rm, 1); drawAtts(); } };
+    $('#atAdd').onclick = () => { const i = document.createElement('input'); i.type = 'file'; i.multiple = true; i.accept = EXT.map(x => '.' + x).join(','); i.onchange = async () => {
+      for (const f of [...i.files].slice(0, 5 - atts.length)) { $('#atAdd').textContent = '올리는 중…'; try { atts.push(await uploadFile(f, postKey)); } catch (e) { A.fail(e, '파일을 올리지 못했습니다.'); } }
+      $('#atAdd').innerHTML = `${I('plus', 'i--sm')}파일 추가`; drawAtts(); }; i.click(); };
     const wrap = (a, b = a, ph = '텍스트') => { const s = ta.selectionStart, e = ta.selectionEnd, t = ta.value.slice(s, e) || ph; ta.setRangeText(a + t + b, s, e, 'select'); ta.focus(); };
     const pre = x => { const s = ta.value.lastIndexOf('\n', ta.selectionStart - 1) + 1; ta.setRangeText(x, s, s, 'end'); ta.focus(); };
     const ins = t => { ta.setRangeText(t, ta.selectionStart, ta.selectionEnd, 'end'); ta.focus(); };
@@ -132,18 +171,46 @@
     ta.addEventListener('dragleave', () => ta.classList.remove('drop-on'));
     ta.addEventListener('drop', e => { e.preventDefault(); ta.classList.remove('drop-on'); imgs([...e.dataTransfer.files]); });
     $('#psave').onclick = async () => {
-      const row = { title: $('#pt').value.trim(), body: ta.value, cover_url: cover || null, pinned: $('#ppin').checked, published: $('#ppub').checked, board: $('#pbd').value };
+      const b = bOf($('#pbd').value);
+      const row = { title: $('#pt').value.trim(), body: ta.value, cover_url: cover || null, pinned: $('#ppin').checked, published: $('#ppub').checked, board: b.slug,
+        category: b.categories?.length ? $('#pcat').value || null : null, attachments: b.kind === 'faq' ? [] : atts };
+      if (p.is_admin) row.author_name = isGeneral(b) ? $('#pau').value.trim() || me : null;
       if (!row.title) { $('#pt').focus(); return A.toast('제목을 입력해 주세요.', true); }
       if (/!\[업로드 중…/.test(row.body)) return A.toast('이미지 업로드가 끝난 뒤 저장해 주세요.', true);
       $('#psave').disabled = true;
-      const q = id === 'new' ? A.sb.from('posts').insert({ ...row, site_id: S.siteId, author: S.user.id }).select('id').single() : A.sb.from('posts').update(row).eq('id', id).select('id').single();
+      const q = id === 'new' ? A.sb.from('posts').insert({ ...row, id: postKey, site_id: S.siteId, author: S.user.id, is_admin: true }).select('id').single() : A.sb.from('posts').update(row).eq('id', id).select('id').single();
       const { data, error } = await q; $('#psave').disabled = false;
       if (error) return A.fail(error, '저장하지 못했습니다.');
       B.board = row.board; A.store.set('iuxc-board', B.board); A.toast('저장했습니다.');
       if (id === 'new') A.go(`${A.siteHash('board')}/${data.id}`);
     };
-    $('#pdel')?.addEventListener('click', async () => { if (!A.confirm('이 글을 삭제할까요?')) return; const { error } = await A.sb.from('posts').delete().eq('id', id); if (error) return A.fail(error); A.toast('삭제했습니다.'); A.go(A.siteHash('board')); });
-    if (id === 'new') $('#pt').focus();
+    $('#pdel')?.addEventListener('click', async () => {
+      if (!A.confirm('이 글을 삭제할까요? 댓글과 첨부파일도 함께 삭제됩니다.')) return;
+      const paths = atts.map(a => a.path).filter(Boolean); if (paths.length) await A.sb.storage.from('files').remove(paths);
+      const { error } = await A.sb.from('posts').delete().eq('id', id); if (error) return A.fail(error); A.toast('삭제했습니다.'); A.go(A.siteHash('board'));
+    });
+    if (id === 'new') $('#pt').focus(); else if (bOf(p.board)?.allow_comment || p.comment_count) comments(id);
+  }
+
+  /* 댓글 관리: 숨김 · 삭제 · 관리자 답글 */
+  async function comments(postId) {
+    const box = $('#cmBox'); if (!box) return;
+    const { data, error } = await A.sb.from('comments').select('*').eq('post_id', postId).order('created_at');
+    if (error) return A.fail(error);
+    const tops = data.filter(c => !c.parent_id);
+    const item = (c, re) => `<div class="cmt${re ? ' cmt--re' : ''}${c.hidden ? ' is-hidden' : ''}" data-id="${c.id}"><div class="row row--sb"><div><b>${esc(c.author_name)}</b>${c.is_admin ? ' <span class="tag">관리자</span>' : ''}${c.hidden ? ' <span class="tag tag--off">숨김</span>' : ''} <small class="muted">${A.dtime(c.created_at)}</small></div>
+      <div class="row">${re ? '' : '<button class="btn btn--xs" data-re>답글</button>'}<button class="btn btn--xs" data-hide>${c.hidden ? '보이기' : '숨기기'}</button><button class="btn btn--xs btn--danger" data-del>삭제</button></div></div><p>${esc(c.body)}</p><div class="cmt__re"></div></div>`;
+    box.innerHTML = `<div class="card card__pad"><div class="card__h"><h2>댓글 ${data.filter(c => !c.hidden).length}</h2><small>숨긴 댓글은 홈페이지에 보이지 않습니다</small></div>
+      <div id="cml">${tops.length ? tops.map(t => item(t) + data.filter(r => r.parent_id === t.id).map(r => item(r, 1)).join('')).join('') : '<p class="muted" style="font-size:13px">아직 댓글이 없습니다.</p>'}</div>
+      <form class="row" id="cmf" style="margin-top:16px;align-items:flex-start"><textarea class="inp grow" rows="2" name="body" placeholder="관리자 댓글" required></textarea><button class="btn btn--primary btn--sm">등록</button></form></div>`;
+    const add = async (body, parent) => { const { error } = await A.sb.from('comments').insert({ site_id: S.siteId, post_id: postId, parent_id: parent || null, author_name: S.user.user_metadata?.name || '관리자', body, is_admin: true, author: S.user.id }); if (error) return A.fail(error); A.toast('등록했습니다.'); comments(postId); };
+    $('#cmf').onsubmit = e => { e.preventDefault(); add(e.target.body.value.trim()); };
+    $('#cml').onclick = async e => {
+      const c = e.target.closest('[data-id]'); if (!c) return; const row = data.find(x => x.id === c.dataset.id);
+      if (e.target.closest('[data-hide]')) { const { error } = await A.sb.from('comments').update({ hidden: !row.hidden }).eq('id', row.id); if (error) return A.fail(error); comments(postId); }
+      if (e.target.closest('[data-del]')) { if (!A.confirm(data.some(x => x.parent_id === row.id) ? '답글까지 모두 삭제할까요?' : '이 댓글을 삭제할까요?')) return; const { error } = await A.sb.from('comments').delete().eq('id', row.id); if (error) return A.fail(error); comments(postId); }
+      if (e.target.closest('[data-re]')) { const slot = $('.cmt__re', c); if (slot.innerHTML) { slot.innerHTML = ''; return; } slot.innerHTML = `<form class="row" style="margin-top:10px;align-items:flex-start"><textarea class="inp grow" rows="2" name="body" placeholder="관리자 답글" required></textarea><button class="btn btn--primary btn--sm">답글 등록</button></form>`; $('form', slot).onsubmit = ev => { ev.preventDefault(); add(ev.target.body.value.trim(), row.id); }; $('textarea', slot).focus(); }
+    };
   }
 
   /* =============== 내 서비스 (고객사) =============== */

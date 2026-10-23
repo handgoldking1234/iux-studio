@@ -1,3 +1,6 @@
 # 홈페이지에서 로그인 없이 문의를 보낼 수 있도록 JWT 검사를 끕니다.
 [functions.inquiry]
 verify_jwt = false
+
+[functions.board]
+verify_jwt = false

@@ -150,7 +150,7 @@
 
   /* ---------- 데이터 ---------- */
   A.loadSites = async () => {
-    const { data, error } = await A.sb.from('sites').select('id,name,category,domain,stage,manager,color,active,notify_emails,allowed_origins,ops,created_at,updated_at').order('created_at');
+    const { data, error } = await A.sb.from('sites').select('id,name,category,domain,stage,manager,color,active,notify_emails,allowed_origins,ops,turnstile_key,created_at,updated_at').order('created_at');
     if (error) throw error;
     S.sites = data || [];
     if (!S.sites.some(s => s.id === S.siteId)) S.siteId = S.sites[0]?.id || '';
@@ -299,10 +299,15 @@
     });
   }
 
-  const siteTabs = A.siteTabs = () => {
-    const client = A.isClient();
-    return [...TABS, ...(client ? [['service', '내 서비스']] : [['settings', '사이트 설정']])];
-  };
+  /* 사이트 메뉴 그룹: 현황 → 통계 분석 → 콘텐츠 → 고객 소통 → 운영 */
+  const siteGroups = A.siteGroups = () => [
+    ['', [['dash', '대시보드']]],
+    ['통계 분석', [['traffic', '유입 · 검색어'], ['device', '기기 · OS'], ['exit', '이탈 분석']]],
+    ['콘텐츠', [['content', '콘텐츠 관리'], ['seo', 'SEO 관리']]],
+    ['고객 소통', [['inq', '문의 관리'], ['board', '게시판']]],
+    ['운영', A.isClient() ? [['service', '내 서비스']] : [['settings', '사이트 설정']]]
+  ];
+  const siteTabs = A.siteTabs = () => siteGroups().flatMap(g => g[1]);
   function paintSide() {
     const side = $('#side'); if (!side) return;
     const client = A.isClient(), cur = A.site(), newN = S.newCounts[S.siteId] || 0;
@@ -314,7 +319,7 @@
       <div style="display:flex;flex-direction:column;gap:8px">
         ${client ? '' : `<div class="side__sep"></div><div class="side__lbl">사이트 관리</div>
         ${cur ? `<button class="sitepick" data-pick title="사이트 선택"><span class="avatar" style="background:${esc(cur.color || A.TINTS[0])}">${esc(A.initial(cur.name))}</span><span><b>${esc(cur.name)}</b><small>${esc(cur.category)}</small></span>${I('updown', 'i--sm')}</button>` : ''}`}
-        ${cur ? `<nav class="nav nav--site">${siteTabs().map(([t, l]) => `<a href="${A.siteHash(t)}" class="${S.view === 'site' && S.tab === t ? 'is-on' : ''}" title="${l}">${I(t)}<span class="lbl">${l}</span>${t === 'inq' && newN ? `<span class="cnt">${newN}</span>` : ''}</a>`).join('')}</nav>` : ''}
+        ${cur ? `<nav class="nav nav--site">${siteGroups().map(([g, items]) => `${g ? `<div class="nav__grp"><span>${g}</span></div>` : ''}${items.map(([t, l]) => `<a href="${A.siteHash(t)}" class="${S.view === 'site' && S.tab === t ? 'is-on' : ''}" title="${l}">${I(t)}<span class="lbl">${l}</span>${t === 'inq' && newN ? `<span class="cnt">${newN}</span>` : ''}</a>`).join('')}`).join('')}</nav>` : ''}
       </div>
       <div class="side__foot">
         ${S.preview ? `<button class="side__back" data-back>슈퍼어드민으로 돌아가기</button>` : ''}

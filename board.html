@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>게시판 — IUX.STUDIO</title>
+<meta name="description" content="IUX.STUDIO 게시판">
+<meta name="theme-color" content="#121212">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="css/style.css?v=8">
+<script src="js/content.js?v=8" defer></script>
+<script src="js/iux-cloud.js?v=8" defer></script>
+<script src="js/site-content.js?v=8" defer></script>
+<script src="js/board-page.js?v=8" defer></script>
+</head>
+<body class="sub">
+
+<header class="header is-solid" id="header">
+  <div class="header__in">
+    <a href="./" class="logo">IUX<span>.</span>STUDIO</a>
+    <nav class="gnb" aria-label="주요 메뉴">
+      <a href="./#works">PORTFOLIO</a><a href="./#service">SERVICE</a><a href="./#process">PROCESS</a><a href="./#about">ABOUT</a><a href="notice.html">NOTICE</a><a href="faq.html">FAQ</a><a href="./#contact">CONTACT</a>
+    </nav>
+    <a href="./#contact" class="btn-line header__cta">문의하기</a>
+    <button type="button" class="burger" id="burger" aria-label="메뉴" aria-expanded="false" aria-controls="mmenu"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<div class="mmenu" id="mmenu" aria-hidden="true">
+  <nav class="mmenu__nav" aria-label="모바일 메뉴">
+    <a href="./#works">PORTFOLIO<svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></a>
+    <a href="./#service">SERVICE<svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></a>
+    <a href="./#process">PROCESS<svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></a>
+    <a href="./#about">ABOUT<svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></a>
+    <a href="notice.html">NOTICE<svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></a>
+    <a href="faq.html">FAQ<svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></a>
+    <a href="./#contact">CONTACT<svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></a>
+  </nav>
+</div>
+
+<main class="wrap board bd" id="bd">
+  <div class="board__head"><p class="eyebrow" id="bdEyebrow">BOARD</p><h1 class="h2" id="bdTitle">게시판</h1></div>
+  <div id="bdView"><p class="board__empty">불러오는 중…</p></div>
+</main>
+
+<footer class="footer">
+  <div class="wrap footer__in">
+    <div>
+      <p class="logo logo--sm">IUX<span>.</span>STUDIO</p>
+    </div>
+    <div class="footer__info">
+      <p class="footer__copy">© <span id="year">2026</span> IUX.STUDIO. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

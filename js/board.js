@@ -2,7 +2,7 @@
   'use strict';
   const S = window.SITE, C = window.IUXCloud;
   const $ = s => document.querySelector(s);
-  const main = $('[data-board]'), board = main.dataset.board, isFaq = main.dataset.kind === 'faq';
+  const main = $('[data-board]'), board = (main.dataset.kind === 'faq' && new URLSearchParams(location.search).get('b')) || main.dataset.board, isFaq = main.dataset.kind === 'faq';
   const page = location.pathname.split('/').pop() || 'notice.html';
   const list = $('#postList'), pager = $('#pager');
   const fmt = d => d.slice(0, 10).replace(/-/g, '.');

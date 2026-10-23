@@ -64,6 +64,10 @@
     const s = slides[cur];
     $('#heroCat').textContent = s.cat;
     $('#heroDesc').textContent = s.desc;
+    // 슬라이드 링크: 있으면 버튼 표시, 없으면 숨김 (기본 슬라이드는 포트폴리오로)
+    const link = 'link' in s ? s.link : '#works', hl = $('#heroLink');
+    hl.parentElement.style.visibility = link ? '' : 'hidden';
+    if (link) { hl.href = link; $('#heroBtn').textContent = s.btn || 'MORE VIEW'; s.newTab ? (hl.target = '_blank', hl.rel = 'noopener') : (hl.removeAttribute('target'), hl.removeAttribute('rel')); }
     const t = $('#heroTitle');
     t.setAttribute('aria-label', s.title.replace(/\n/g, ' '));
     t.innerHTML = s.title.split('\n').map(line =>
@@ -92,6 +96,20 @@
   // 탭이 백그라운드일 땐 멈춤
   document.addEventListener('visibilitychange', () => { if (document.hidden) { clearInterval(timer); progAnim?.pause(); } else { progAnim?.play(); restart(); } });
   paintHero(); restart();
+
+  /* ---------- 섹션 문구 (서비스 · 프로세스 · 선택 이유 · 문의 배너) ---------- */
+  const br = t => esc(t || '').replace(/\n/g, '<br>');
+  const X = S.sections || {};
+  if (X.services?.length) $('#svcGrid').innerHTML = X.services.map((v, i) => `<div class="card" data-reveal><p class="num">${String(i + 1).padStart(2, '0')}</p><p class="card__t">${esc(v.t)}</p><p class="card__d">${esc(v.d)}</p></div>`).join('');
+  if (X.process) {
+    $('#prEye').textContent = X.process.eyebrow || ''; $('#prTitle').innerHTML = br(X.process.title); $('#prLead').textContent = X.process.lead || '';
+    if (X.process.steps?.length) $('#prSteps').innerHTML = X.process.steps.map((v, i, a) => `<li data-reveal><span${i === a.length - 1 ? ' class="on"' : ''}>${String(i + 1).padStart(2, '0')}</span><div><p>${esc(v.t)}</p><p>${esc(v.d)}</p></div></li>`).join('');
+  }
+  if (X.about) {
+    $('#abEye').textContent = X.about.eyebrow || ''; $('#abTitle').innerHTML = br(X.about.title);
+    if (X.about.items?.length) $('#abGrid').innerHTML = X.about.items.map(v => `<div class="why" data-reveal><p>${br(v.t)}</p><p>${esc(v.d)}</p></div>`).join('');
+  }
+  if (X.cta?.title) $('#ctaTitle').innerHTML = br(X.cta.title);
 
   /* ---------- 마키 ---------- */
   const group = () => { const g = el('div', 'marquee__group'); S.marquee.forEach(t => g.appendChild(el('span', '', esc(t)))); return g; };

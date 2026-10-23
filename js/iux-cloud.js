@@ -93,9 +93,11 @@
     return j;
   }
 
-  async function listPosts(board, { page = 1, size = 10, q = '', full = false, oldestFirst = false } = {}) {
+  const POST_COLS = 'id,title,cover_url,pinned,views,created_at,updated_at,body,category,author_name,is_admin,attachments,comment_count,board';
+  async function listPosts(board, { page = 1, size = 10, q = '', full = false, oldestFirst = false, category = '' } = {}) {
     const from = (page - 1) * size;
-    let p = `posts?select=id,title,cover_url,pinned,views,created_at,body&site_id=eq.${enc(cfg.siteId)}&board=eq.${enc(board)}&published=is.true&order=pinned.desc,created_at.${oldestFirst ? 'asc' : 'desc'}`;
+    let p = `posts?select=${POST_COLS}&site_id=eq.${enc(cfg.siteId)}&board=eq.${enc(board)}&published=is.true&order=pinned.desc,created_at.${oldestFirst ? 'asc' : 'desc'}`;
+    if (category) p += `&category=eq.${enc(category)}`;
     if (q) p += `&title=ilike.${enc('*' + q.replace(/[*,()]/g, ' ') + '*')}`;
     const r = await rest(p, { headers: { Prefer: 'count=exact', Range: `${from}-${from + size - 1}` } });
     if (!r.ok && r.status !== 416) throw new Error('목록을 불러오지 못했습니다.');
@@ -105,14 +107,63 @@
   }
 
   async function getPost(id) {
-    const r = await rest(`posts?select=*&id=eq.${enc(id)}&site_id=eq.${enc(cfg.siteId)}&published=is.true`);
+    const r = await rest(`posts?select=${POST_COLS}&id=eq.${enc(id)}&site_id=eq.${enc(cfg.siteId)}&published=is.true`);
     const post = r.ok ? (await r.json())[0] : null;
     if (post) rest('rpc/increment_post_view', { method: 'POST', body: JSON.stringify({ p: id }) }).catch(() => {});
     return post || null;
   }
 
+  /* ---------- 일반 게시판: 방문자 글쓰기 · 댓글 (로봇 방지 Turnstile) ---------- */
+  async function boardCall(action, data) {
+    const r = await fetch(`${cfg.url}/functions/v1/board`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action, site: cfg.siteId, ...data }) });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok || !j.ok) { const e = new Error(j.message || '처리하지 못했습니다.'); e.code = j.error; throw e; }
+    return j;
+  }
+  const meta = f => ({ name: f.name, size: f.size, type: f.type });
+  async function putFiles(res, files) {
+    const done = [];
+    for (let i = 0; i < (res.uploads || []).length; i++) {
+      const u = res.uploads[i], f = files[i];
+      const type = /^(image\/(jpeg|png|gif|webp)|application\/pdf|text\/plain|application\/zip)$/.test(f.type) ? f.type : 'application/octet-stream';
+      const r = await fetch(u.url, { method: 'PUT', headers: { 'Content-Type': type, 'x-upsert': 'false' }, body: f });
+      if (r.ok) done.push({ path: u.path, name: u.name, size: u.size, type });
+    }
+    if (done.length) await boardCall('attach', { id: res.id, ticket: res.ticket, files: done });
+    return done.length;
+  }
+  async function createPost(d) {
+    const files = [...(d.files || [])];
+    const res = await boardCall('create_post', { board: d.board, title: d.title, body: d.body, category: d.category, name: d.name, pw: d.pw, token: d.token, files: files.map(meta) });
+    await putFiles(res, files); return res.id;
+  }
+  const checkPost = (id, pw, token) => boardCall('check_post', { id, pw, token }).then(j => j.ticket);
+  async function updatePost(id, ticket, d) {
+    const files = [...(d.files || [])];
+    const res = await boardCall('update_post', { id, ticket, title: d.title, body: d.body, category: d.category, name: d.name, keep: d.keep || [], files: files.map(meta) });
+    await putFiles(res, files); return id;
+  }
+  const deletePost = (id, pw, token) => boardCall('delete_post', { id, pw, token });
+  const createComment = d => boardCall('create_comment', d);
+  const deleteComment = (id, pw, token) => boardCall('delete_comment', { id, pw, token });
+  async function getComments(postId) {
+    const r = await rest(`comments?select=id,parent_id,author_name,body,is_admin,created_at&post_id=eq.${enc(postId)}&hidden=is.false&order=created_at.asc`);
+    return r.ok ? r.json() : [];
+  }
+  /* Turnstile 위젯: const c = await IUXCloud.captcha(el); c.token(); c.reset(); */
+  let tsLoad = null;
+  async function captcha(el) {
+    const site = await getSite(), key = site && site.turnstile;
+    if (!key) { el.innerHTML = '<p style="font-size:13px;color:#f3727f">로봇 방지 설정이 아직 되지 않았습니다.</p>'; return { token: () => '', reset() {} }; }
+    tsLoad = tsLoad || new Promise((res, rej) => { const sc = document.createElement('script'); sc.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit'; sc.async = true; sc.onload = res; sc.onerror = rej; document.head.appendChild(sc); });
+    await tsLoad;
+    let tok = '';
+    const wid = g.turnstile.render(el, { sitekey: key, theme: 'dark', language: 'ko', callback: t => { tok = t; }, 'expired-callback': () => { tok = ''; } });
+    return { token: () => tok, reset: () => { tok = ''; g.turnstile.reset(wid); } };
+  }
+
   async function getBoard(slug) {
-    const r = await rest(`boards?select=slug,name,kind&site_id=eq.${enc(cfg.siteId)}&slug=eq.${enc(slug)}`);
+    const r = await rest(`boards?select=slug,name,kind,categories,allow_write,allow_comment,show_menu&site_id=eq.${enc(cfg.siteId)}&slug=eq.${enc(slug)}`);
     return r.ok ? (await r.json())[0] || null : null;
   }
 
@@ -157,6 +208,7 @@
     track, getSite,
     get ready() { return ready(); },
     get siteId() { return cfg.siteId; },
-    sendInquiry, listPosts, getPost, getBoard, md, excerpt, esc
+    sendInquiry, listPosts, getPost, getBoard, md, excerpt, esc,
+    createPost, checkPost, updatePost, deletePost, createComment, deleteComment, getComments, captcha
   };
 })(window);

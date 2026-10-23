@@ -10,8 +10,10 @@ window.SiteReady = (async () => {
   const c = r.content || {}, seo = r.seo || {};
 
   /* ---------- 콘텐츠 ---------- */
-  if (Array.isArray(c.hero) && c.hero.length) S.hero.slides = c.hero.map(h => ({ cat: h.cat || '', title: h.title || '', desc: h.desc || '', img: h.img || '' }));
+  if (Array.isArray(c.hero) && c.hero.length) S.hero.slides = c.hero.map(h => ({ cat: h.cat || '', title: h.title || '', desc: h.desc || '', img: h.img || '', link: h.link || '', btn: h.btn || '', newTab: !!h.newTab }));
   if (Array.isArray(c.works)) S.works = c.works.map(w => ({ name: w.name || '프로젝트', cat: w.cat || '', img: w.img || '', link: w.link || '' }));
+  if (Array.isArray(c.marquee) && c.marquee.length) S.marquee = c.marquee.filter(Boolean);
+  if (c.sections) ['services', 'process', 'about', 'cta'].forEach(k => { if (c.sections[k]) S.sections[k] = c.sections[k]; });
   if (c.company) Object.keys(c.company).forEach(k => { if (c.company[k]) S.company[k] = c.company[k]; });
   if (Array.isArray(c.popups)) S.popups = c.popups.map(p => ({ ...p, key: p.key || p.id, on: !!p.on }));
   if (c.popRoll) S.popupRoll = { on: !!c.popRoll.on, sec: c.popRoll.sec || 5 };
@@ -26,6 +28,20 @@ window.SiteReady = (async () => {
     const gnb = document.querySelector('.gnb'), mnav = document.querySelector('.mmenu__nav');
     const before = n => n && [...n.children].find(a => /notice\.html/.test(a.getAttribute('href') || ''));
     tops.forEach(p => { gnb?.insertBefore(link(p), before(gnb) || null); mnav?.insertBefore(link(p, true), before(mnav) || null); });
+  }
+
+  /* ---------- '메뉴에 표시' 한 게시판 ---------- */
+  S.boards = r.boards || [];
+  const menuBoards = S.boards.filter(b => b.show_menu && !['notice', 'faq'].includes(b.slug));
+  if (menuBoards.length) {
+    const cur = new URLSearchParams(location.search).get('b');
+    const arrow = '<svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>';
+    const gnb = document.querySelector('.gnb'), mnav = document.querySelector('.mmenu__nav');
+    const before = n => n && [...n.children].find(a => /notice\.html/.test(a.getAttribute('href') || ''));
+    menuBoards.forEach(b => [[gnb, ''], [mnav, arrow]].forEach(([nav, ic]) => {
+      if (!nav) return; const a = document.createElement('a'); a.href = (b.kind === 'faq' ? 'faq.html?b=' : 'board.html?b=') + encodeURIComponent(b.slug);
+      a.innerHTML = b.name.replace(/[<>&]/g, '') + ic; if (cur === b.slug) a.className = 'is-on'; nav.insertBefore(a, before(nav)?.nextSibling || null);
+    }));
   }
 
   /* ---------- SEO ---------- */

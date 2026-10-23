@@ -11,6 +11,7 @@
 index.html            홈페이지
 notice.html           공지사항 게시판 (목록 · 검색 · 상세)
 faq.html              자주 묻는 질문 (펼침형)
+board.html            일반 게시판 (분류 · 첨부 · 방문자 글쓰기 · 댓글/대댓글, ?b=주소)
 page.html             서브 페이지 (관리자 '콘텐츠 관리 > 서브 페이지')
 css/style.css         홈페이지 스타일
 js/content.js         ★ 홈페이지 텍스트 · 이미지 · 연락처 · 팝업 · 연결 설정
@@ -21,6 +22,7 @@ js/site-content.js    관리자에서 저장한 콘텐츠 · SEO 를 홈페이�
 admin/                관리자 페이지 (config.js 연결값, js/ 화면별 코드)
 supabase/migrations/  DB 테이블 · 권한(RLS) · 통계 함수 — SQL Editor 에서 순서대로 실행
 supabase/functions/inquiry/  문의 수신 함수 (저장 + 메일 알림 + 스팸/도배 방지)
+supabase/functions/board/    게시판 함수 (방문자 글 · 댓글 · 첨부, Turnstile 로봇 방지)
 supabase/seed/faq.sql FAQ 게시판 + 추천 질문 12개 (SQL Editor 에서 실행, 기존 FAQ 는 교체됨)
 docs/SETUP.md         설정 안내
 ```
