@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>관리자 — IUX Cloud</title>
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="admin.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" defer></script>
+<script src="config.js" defer></script>
+<script src="../js/iux-cloud.js" defer></script>
+<script src="admin.js" defer></script>
+</head>
+<body>
+
+<!-- 로그인 -->
+<section class="auth" id="auth" hidden>
+  <form class="auth__box" id="loginForm">
+    <p class="auth__logo"><b>IUX</b><span>.</span>CLOUD</p>
+    <h1>관리자 로그인</h1>
+    <label>이메일<input name="email" type="email" required autocomplete="username"></label>
+    <label>비밀번호<input name="password" type="password" required autocomplete="current-password"></label>
+    <p class="auth__err" id="loginErr" hidden></p>
+    <button class="btn btn--primary btn--block" type="submit">로그인</button>
+    <button class="linkbtn" type="button" id="forgotBtn">비밀번호를 잊으셨나요?</button>
+  </form>
+  <form class="auth__box" id="pwForm" hidden>
+    <p class="auth__logo"><b>IUX</b><span>.</span>CLOUD</p>
+    <h1>새 비밀번호 설정</h1>
+    <label>새 비밀번호 (8자 이상)<input name="pw" type="password" minlength="8" required autocomplete="new-password"></label>
+    <p class="auth__err" id="pwErr" hidden></p>
+    <button class="btn btn--primary btn--block" type="submit">저장</button>
+  </form>
+  <div class="auth__box" id="setupNotice" hidden>
+    <p class="auth__logo"><b>IUX</b><span>.</span>CLOUD</p>
+    <h1>연결 설정이 필요합니다</h1>
+    <p class="muted"><code>admin/config.js</code> 에 Supabase Project URL 과 anon key 를 넣어주세요. 자세한 방법은 <code>docs/SETUP.md</code> 를 참고하세요.</p>
+  </div>
+</section>
+
+<!-- 앱 -->
+<div class="app" id="app" hidden>
+  <aside class="side">
+    <p class="side__logo"><b>IUX</b><span>.</span>CLOUD</p>
+    <nav class="side__nav">
+      <a href="#inbox" data-nav="inbox"><svg viewBox="0 0 24 24"><path d="M3 13h5l2 3h4l2-3h5M5 5h14l2 8v6H3v-6z"/></svg>문의함<span class="cnt" id="newCnt" hidden></span></a>
+      <a href="#posts" data-nav="posts"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5"/></svg>게시판</a>
+      <a href="#sites" data-nav="sites" data-admin><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18"/></svg>사이트 관리</a>
+    </nav>
+    <div class="side__user">
+      <p id="userEmail"></p>
+      <p class="muted" id="userRole"></p>
+      <div class="side__btns"><button class="linkbtn" id="pwChangeBtn" type="button">비밀번호 변경</button><button class="linkbtn" id="logoutBtn" type="button">로그아웃</button></div>
+    </div>
+  </aside>
+  <div class="main">
+    <header class="top">
+      <label class="top__site">
+        <span class="muted">사이트</span>
+        <select id="siteSel"></select>
+      </label>
+    </header>
+    <main id="view" class="view"></main>
+  </div>
+</div>
+
+<!-- 문의 상세 -->
+<div class="drawer" id="drawer" hidden>
+  <div class="drawer__dim" data-x></div>
+  <aside class="drawer__box" role="dialog" aria-modal="true" aria-labelledby="dTitle">
+    <header class="drawer__head"><h2 id="dTitle">문의 상세</h2><button class="iconbtn" data-x aria-label="닫기">✕</button></header>
+    <div class="drawer__body" id="dBody"></div>
+  </aside>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>

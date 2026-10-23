@@ -8,6 +8,7 @@
   const motion = !matchMedia('(prefers-reduced-motion: reduce)').matches;
   const root = document.documentElement;
   if (motion) root.classList.add('js-motion');
+  if (window.IUXCloud && S.cloud) IUXCloud.init(S.cloud);
 
   /* ---------- body scroll lock (모달/메뉴 중첩 대응) ---------- */
   const locks = new Set();
@@ -233,7 +234,15 @@
 
     submitBtn.disabled = true;
     try {
-      if (S.web3formsKey) {
+      if (window.IUXCloud?.ready) {
+        const v = k => (fd.get(k) || '').toString();
+        await IUXCloud.sendInquiry({
+          kind: tab, name: v('name'), company: v('company'), phone: v('phone'), email: v('email'),
+          subject: v('subject'), message: v('msg'), ref: v('ref'),
+          types: tab === 'quote' ? picks.type : [], budget: tab === 'quote' ? picks.budget || '' : '', schedule: tab === 'quote' ? picks.schedule || '' : ''
+        });
+        $('#sentMsg').textContent = '영업일 기준 1일 이내에 담당자가 연락드립니다.';
+      } else if (S.web3formsKey) {
         const r = await fetch('https://api.web3forms.com/submit', { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify({ access_key: S.web3formsKey, subject, from_name: 'IUX.STUDIO 홈페이지', replyto: data.이메일, ...data }) });
         const j = await r.json().catch(() => ({}));
         if (!r.ok || !j.success) throw new Error(j.message || r.status);
@@ -249,11 +258,24 @@
       }
       form.reset(); picks.type = []; picks.budget = picks.schedule = null; paintChips();
       form.hidden = true; sent.hidden = false;
-    } catch (_) {
-      err.textContent = `전송에 실패했습니다. 잠시 후 다시 시도하시거나 ${C.email} 로 메일 주세요.`;
+    } catch (x) {
+      (x.fields || []).forEach(f => form.elements[f === 'message' ? 'msg' : f]?.classList.add('is-invalid'));
+      err.textContent = x.code && x.code !== 'save_failed' ? x.message : `전송에 실패했습니다. 잠시 후 다시 시도하시거나 ${C.email} 로 메일 주세요.`;
       err.hidden = false;
     } finally { submitBtn.disabled = false; }
   });
+
+  /* ---------- 최근 공지 ---------- */
+  if (window.IUXCloud?.ready) {
+    IUXCloud.listPosts('notice', { size: 3 }).then(({ items }) => {
+      if (!items.length) return;
+      $('#newsList').innerHTML = items.map(p => `<li><a href="notice.html?id=${p.id}">
+        <span class="news__date">${p.created_at.slice(0, 10).replace(/-/g, '.')}</span>
+        <span class="news__t">${p.pinned ? '<em>공지</em>' : ''}${esc(p.title)}</span>
+        <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></a></li>`).join('');
+      $('#news').hidden = false;
+    }).catch(() => {});
+  }
 
   /* ---------- 공지 팝업 ---------- */
   const pop = $('#pop');

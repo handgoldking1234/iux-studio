@@ -17,6 +17,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link rel="stylesheet" href="css/style.css">
 <script src="js/content.js" defer></script>
+<script src="js/iux-cloud.js" defer></script>
 <script src="js/main.js" defer></script>
 </head>
 <body>
@@ -48,7 +49,7 @@
   <div class="header__in">
     <a href="#top" class="logo">IUX<span>.</span>STUDIO</a>
     <nav class="gnb" aria-label="주요 메뉴">
-      <a href="#works">PORTFOLIO</a><a href="#service">SERVICE</a><a href="#process">PROCESS</a><a href="#about">ABOUT</a><a href="#contact">CONTACT</a>
+      <a href="#works">PORTFOLIO</a><a href="#service">SERVICE</a><a href="#process">PROCESS</a><a href="#about">ABOUT</a><a href="notice.html">NOTICE</a><a href="#contact">CONTACT</a>
     </nav>
     <a href="#contact" class="btn-line header__cta" data-open="email">이메일문의</a>
     <button type="button" class="burger" id="burger" aria-label="메뉴" aria-expanded="false" aria-controls="mmenu"><span></span><span></span><span></span></button>
@@ -62,6 +63,7 @@
     <a href="#service">SERVICE<svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></a>
     <a href="#process">PROCESS<svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></a>
     <a href="#about">ABOUT<svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></a>
+    <a href="notice.html">NOTICE<svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></a>
     <a href="#contact">CONTACT<svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></a>
   </nav>
   <div class="mmenu__foot">
@@ -150,6 +152,15 @@
   </div>
 </section>
 
+<!-- 최근 공지 (IUX Cloud 연결 시 표시) -->
+<section id="news" class="wrap news" hidden>
+  <div class="news__head">
+    <p class="eyebrow">NOTICE</p>
+    <a href="notice.html" class="news__more">전체보기<svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></a>
+  </div>
+  <ul class="news__list" id="newsList"></ul>
+</section>
+
 <!-- 06 Contact -->
 <section id="contact" class="wrap sec sec--top0">
   <div class="cta" data-reveal>
@@ -167,6 +178,7 @@
     <div>
       <p class="logo logo--sm">IUX<span>.</span>STUDIO</p>
       <p class="footer__slogan">보이는 것을 넘어 움직이게 하는 웹.</p>
+      <p class="footer__links"><a href="notice.html">공지사항</a><a href="#contact" data-open="quote">견적 문의</a></p>
     </div>
     <div class="footer__info">
       <dl id="footerInfo"></dl>

@@ -11,7 +11,16 @@ window.SITE = {
     bizNo: ''                     // 예: '000-00-00000'
   },
 
-  /* 문의 폼 수신 설정 (견적 문의 · 이메일 문의 공통)
+  /* IUX Cloud (Supabase) 연결 — 문의함 · 게시판
+     docs/SETUP.md 대로 설정한 뒤 Project URL 과 anon public key 를 넣으세요.
+     (anon key 는 공개용 키라 홈페이지 코드에 넣어도 안전합니다) */
+  cloud: {
+    url: '',        // 예) 'https://abcdefgh.supabase.co'
+    anonKey: '',    // 예) 'eyJhbGciOi...'
+    siteId: 'iux-studio'
+  },
+
+  /* 문의 폼 수신 설정 (cloud 가 설정되어 있으면 cloud 가 우선)
      1순위 web3formsKey : https://web3forms.com 에서 받는 Access Key.
                           키를 발급받은 이메일로 문의 내용이 바로 도착합니다.
      2순위 formEndpoint : Formspree 등 다른 폼 서비스 주소 (예: 'https://formspree.io/f/xxxxxxx')
