@@ -507,3 +507,9 @@ pre.code{margin:0;background:#0b0b0b;color:#e4e4e4;border-radius:8px;padding:16p
 .list{list-style:none;margin:0;padding:0}
 .list li{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--line)}
 .list li:last-child{border-bottom:0}
+
+/* 셀렉트 박스: 화살표 오른쪽 여백을 왼쪽 여백(14px)과 동일하게 */
+select.inp,.field select,.workcard select{appearance:none;-webkit-appearance:none;padding-right:40px!important;padding-left:14px;background-repeat:no-repeat;background-position:right 14px center;background-size:14px 14px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b3b3b3' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")}
+[data-theme="light"] select.inp,[data-theme="light"] .field select,[data-theme="light"] .workcard select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23555b65' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")}
+.vwork select{appearance:none;-webkit-appearance:none;padding:0 26px 0 8px;background:#1f1f1f url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b3b3b3' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 8px center/12px 12px}
