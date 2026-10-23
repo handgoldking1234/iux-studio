@@ -7,10 +7,12 @@
      const { items, total } = await IUXCloud.listPosts('notice', { page: 1, size: 10 });
      const post = await IUXCloud.getPost(id);
      el.innerHTML = IUXCloud.md(post.body);
+     const site = await IUXCloud.getSite();   // 관리자 '콘텐츠 관리'에서 저장한 내용
+   방문 통계는 init() 하면 자동으로 기록됩니다. (끄려면 init({ ..., track: false }))
    ========================================================= */
 (function (g) {
   'use strict';
-  const cfg = { url: '', anonKey: '', siteId: '' };
+  const cfg = { url: '', anonKey: '', siteId: '', track: true };
   const ready = () => !!(cfg.url && cfg.anonKey && cfg.siteId);
   const rest = (path, opt = {}) => fetch(`${cfg.url}/rest/v1/${path}`, {
     ...opt, headers: { apikey: cfg.anonKey, Authorization: `Bearer ${cfg.anonKey}`, 'Content-Type': 'application/json', ...(opt.headers || {}) }
@@ -24,11 +26,67 @@
     unknown_site: '사이트 설정을 확인해 주세요.'
   };
 
+  /* ---------- 방문 기록 (쿠키 · 개인정보 없이 세션 단위) ---------- */
+  const ss = { get: k => { try { return sessionStorage.getItem(k); } catch (_) { return null; } }, set: (k, v) => { try { sessionStorage.setItem(k, v); } catch (_) {} } };
+  const SEARCH = { naver: /(^|\.)search\.naver\.com$|^m\.search\.naver\.com$/, google: /(^|\.)google\./, daum: /(^|\.)search\.daum\.net$|^m\.search\.daum\.net$/, bing: /(^|\.)bing\.com$/ };
+  const SOCIAL = { instagram: /instagram\.com$/, facebook: /(facebook|fb)\.com$/, kakao: /kakao\.com$|kakao\.co\.kr$/, youtube: /youtube\.com$|youtu\.be$/, blog: /blog\.naver\.com$|tistory\.com$|brunch\.co\.kr$|velog\.io$/ };
+  function session() {
+    let sid = ss.get('iuxc-sid'), src = ss.get('iuxc-src'), last = +ss.get('iuxc-t') || 0;
+    if (!sid || Date.now() - last > 30 * 60 * 1000) {
+      sid = (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2) + Date.now().toString(36));
+      const q = new URLSearchParams(location.search), utm = (q.get('utm_source') || '').toLowerCase();
+      let host = ''; try { host = document.referrer ? new URL(document.referrer).hostname.replace(/^www\./, '') : ''; } catch (_) {}
+      if (host === location.hostname) host = '';
+      src = utm ? (Object.keys({ ...SEARCH, ...SOCIAL }).find(k => utm.includes(k)) || 'other')
+        : !host ? 'direct' : (Object.keys(SEARCH).find(k => SEARCH[k].test(host)) || Object.keys(SOCIAL).find(k => SOCIAL[k].test(host)) || 'other');
+      ss.set('iuxc-sid', sid); ss.set('iuxc-src', src); ss.set('iuxc-ref', host); ss.set('iuxc-kw', q.get('utm_term') || q.get('keyword') || '');
+    }
+    ss.set('iuxc-t', Date.now());
+    return { sid, src, ref: ss.get('iuxc-ref') || '', kw: ss.get('iuxc-kw') || '' };
+  }
+  function env() {
+    const ua = navigator.userAgent, w = Math.min(screen.width, screen.height), touch = navigator.maxTouchPoints > 1;
+    const device = /iPad|Tablet/i.test(ua) || (touch && /Macintosh/.test(ua)) || (/Android/.test(ua) && !/Mobile/.test(ua)) ? 'tablet' : /Mobi|iPhone|Android/i.test(ua) ? 'mobile' : 'pc';
+    const os = /iPhone|iPad|iPod/.test(ua) || (touch && /Macintosh/.test(ua)) ? 'iOS' : /Android/.test(ua) ? 'Android' : /Windows/.test(ua) ? 'Windows' : /Mac OS X/.test(ua) ? 'macOS' : /Linux/.test(ua) ? 'Linux' : '기타';
+    const browser = /NAVER/.test(ua) ? '네이버 앱' : /KAKAOTALK/.test(ua) ? '카카오톡' : /SamsungBrowser/.test(ua) ? 'Samsung Internet' : /Edg\//.test(ua) ? 'Edge' : /Whale/.test(ua) ? 'Whale' : /Chrome|CriOS/.test(ua) ? 'Chrome' : /Safari/.test(ua) ? 'Safari' : /Firefox|FxiOS/.test(ua) ? 'Firefox' : '기타';
+    return { device, os, browser, screen: `${screen.width}x${screen.height}` };
+  }
+  let pv = null, pvStart = 0, hiddenMs = 0, hiddenAt = 0;
+  async function track(path) {
+    if (!ready() || !cfg.track || navigator.webdriver) return;
+    const s = session();
+    flush();
+    pvStart = Date.now(); hiddenMs = 0; hiddenAt = 0;
+    try {
+      const r = await rest('rpc/track', { method: 'POST', body: JSON.stringify({ p: { site: cfg.siteId, sid: s.sid, path: path || new URLSearchParams(location.search).get('p') || location.pathname.replace(/\/index\.html$/, '/').replace(/^\/[^/]+(?=\/)/, m => location.hostname.endsWith('github.io') ? '' : m), title: document.title.slice(0, 200), ref: s.ref, source: s.src, kw: s.kw, ...env() } }) });
+      pv = r.ok ? { id: await r.json(), sid: s.sid } : null;
+    } catch (_) { pv = null; }
+  }
+  function flush() {
+    if (!pv || !pv.id) return;
+    const ms = Date.now() - pvStart - hiddenMs - (hiddenAt ? Date.now() - hiddenAt : 0);
+    rest('rpc/track_time', { method: 'POST', keepalive: true, body: JSON.stringify({ p_id: pv.id, p_sid: pv.sid, p_ms: Math.round(ms) }) }).catch(() => {});
+  }
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) { hiddenAt = Date.now(); flush(); }
+    else if (hiddenAt) { hiddenMs += Date.now() - hiddenAt; hiddenAt = 0; }
+  });
+  addEventListener('pagehide', flush);
+
+  /* ---------- 관리자에서 저장한 콘텐츠 ---------- */
+  let sitePromise = null;
+  function getSite() {
+    if (!ready()) return Promise.resolve(null);
+    return sitePromise || (sitePromise = rest('rpc/site_public', { method: 'POST', body: JSON.stringify({ s: cfg.siteId }) })
+      .then(r => r.ok ? r.json() : null).catch(() => null));
+  }
+
   async function sendInquiry(data) {
     if (!ready()) throw new Error('IUXCloud.init() 설정이 필요합니다.');
+    const s = session();
     const r = await fetch(`${cfg.url}/functions/v1/inquiry`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ siteId: cfg.siteId, ...data })
+      body: JSON.stringify({ siteId: cfg.siteId, source: s.src, sid: s.sid, ...data })
     });
     const j = await r.json().catch(() => ({}));
     if (!r.ok || !j.ok) { const e = new Error(ERR[j.error] || '전송에 실패했습니다.'); e.code = j.error; e.fields = j.fields; throw e; }
@@ -91,7 +149,12 @@
   const excerpt = (s, n = 120) => String(s || '').replace(/!\[[^\]]*\]\([^)]*\)/g, '').replace(/\[([^\]]+)\]\([^)]*\)/g, '$1').replace(/[#>*`_-]/g, '').replace(/\s+/g, ' ').trim().slice(0, n);
 
   g.IUXCloud = {
-    init(o) { Object.assign(cfg, o || {}); return this; },
+    init(o) {
+      Object.assign(cfg, o || {});
+      if (cfg.track && !this._tracked) { this._tracked = true; document.readyState === 'loading' ? addEventListener('DOMContentLoaded', () => track()) : track(); }
+      return this;
+    },
+    track, getSite,
     get ready() { return ready(); },
     get siteId() { return cfg.siteId; },
     sendInquiry, listPosts, getPost, getBoard, md, excerpt, esc

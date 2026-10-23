@@ -2,7 +2,7 @@
 
 - **홈페이지**: Claude Design 시안(`AIOX Lab Site`)을 구현한 정적 사이트 (GitHub Pages)
 - **IUX Cloud**: 여러 고객사 홈페이지가 함께 쓰는 문의 · 게시판 백엔드 (Supabase + Resend)
-- **관리자 페이지**: `/admin` — 문의함, 게시판 글쓰기, 사이트 · 담당자 관리
+- **관리자 페이지**: `/admin` — Claude Design 'IUXSTUDIO Admin' 시안 기준 슈퍼 어드민 (전체 현황 · 사이트 제작 · 도메인/호스팅 · 방문 통계 · 콘텐츠 · SEO · 문의 · 게시판 · 계정)
 
 👉 처음 설정은 [docs/SETUP.md](docs/SETUP.md) 를 따라 하세요.
 
@@ -11,13 +11,15 @@
 index.html            홈페이지
 notice.html           공지사항 게시판 (목록 · 검색 · 상세)
 faq.html              자주 묻는 질문 (펼침형)
+page.html             서브 페이지 (관리자 '콘텐츠 관리 > 서브 페이지')
 css/style.css         홈페이지 스타일
 js/content.js         ★ 홈페이지 텍스트 · 이미지 · 연락처 · 팝업 · 연결 설정
 js/main.js            홈페이지 동작 (슬라이더, 메뉴, 포트폴리오, 문의 모달, 팝업)
 js/board.js           게시판 페이지 동작
-js/iux-cloud.js       ★ 모든 고객사 사이트에 넣는 공용 스크립트 (문의 보내기 · 게시글 읽기)
-admin/                관리자 페이지 (config.js 에 연결값)
-supabase/migrations/  DB 테이블 · 권한(RLS) — SQL Editor 에서 실행
+js/iux-cloud.js       ★ 모든 고객사 사이트에 넣는 공용 스크립트 (방문 통계 · 문의 · 게시글 · 콘텐츠)
+js/site-content.js    관리자에서 저장한 콘텐츠 · SEO 를 홈페이지에 적용
+admin/                관리자 페이지 (config.js 연결값, js/ 화면별 코드)
+supabase/migrations/  DB 테이블 · 권한(RLS) · 통계 함수 — SQL Editor 에서 순서대로 실행
 supabase/functions/inquiry/  문의 수신 함수 (저장 + 메일 알림 + 스팸/도배 방지)
 supabase/seed/faq.sql FAQ 게시판 + 추천 질문 12개 (SQL Editor 에서 실행, 기존 FAQ 는 교체됨)
 docs/SETUP.md         설정 안내

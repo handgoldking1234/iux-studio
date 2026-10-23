@@ -12,6 +12,7 @@ type Env = Record<string, string | undefined>;
 const LIMIT = { perIp10m: 5 };
 const MAX = { name: 50, company: 100, phone: 30, email: 120, subject: 200, message: 5000, ref: 300, chip: 40 };
 const KIND_LABEL: Record<string, string> = { quote: '견적 문의', email: '이메일 문의', etc: '기타 문의' };
+const SOURCE_LABEL: Record<string, string> = { naver: '네이버 검색', google: '구글 검색', daum: '다음 검색', bing: 'Bing 검색', direct: '직접 방문', instagram: '인스타그램', facebook: '페이스북', kakao: '카카오', youtube: '유튜브', blog: '블로그', other: '기타 추천' };
 
 const cors = (origin: string | null) => ({
   'Access-Control-Allow-Origin': origin || '*',
@@ -65,6 +66,7 @@ export async function handle(req: Request, env: Env, fx: typeof fetch = fetch): 
     ref_url: str(b.ref, MAX.ref),
     types: (Array.isArray(b.types) ? b.types : []).slice(0, 20).map(t => str(t, MAX.chip)).filter(Boolean),
     budget: str(b.budget, MAX.chip), schedule: str(b.schedule, MAX.chip),
+    source: str(b.source, 30), sid: str(b.sid, 64),
     extra: b.extra && typeof b.extra === 'object' && !Array.isArray(b.extra) ? Object.fromEntries(Object.entries(b.extra as object).slice(0, 20).map(([k, v]) => [str(k, 40), str(String(v), 1000)])) : {},
   };
   const errors: string[] = [];
@@ -102,7 +104,7 @@ export async function handle(req: Request, env: Env, fx: typeof fetch = fetch): 
     const rows: [string, string][] = [
       ['구분', label], ['담당자명', row.name], ['회사명', row.company], ['연락처', row.phone], ['이메일', row.email],
       ['제목', row.subject], ['문의 유형', row.types.join(', ')], ['예상 예산', row.budget], ['희망 오픈 시기', row.schedule],
-      ['참고 사이트', row.ref_url], ...Object.entries(row.extra).map(([k, v]) => [k, String(v)] as [string, string]),
+      ['참고 사이트', row.ref_url], ['유입 경로', SOURCE_LABEL[row.source] || row.source], ...Object.entries(row.extra).map(([k, v]) => [k, String(v)] as [string, string]),
     ];
     const html = `<div style="font-family:Apple SD Gothic Neo,Malgun Gothic,sans-serif;max-width:640px">
       <h2 style="margin:0 0 16px;font-size:20px">${esc(site.name)} · 새 ${label}</h2>

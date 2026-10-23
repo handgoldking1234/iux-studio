@@ -1,6 +1,6 @@
-(() => {
+(async () => {
   'use strict';
-  const S = window.SITE;
+  const S = await (window.SiteReady || Promise.resolve(window.SITE));
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
@@ -8,7 +8,6 @@
   const motion = !matchMedia('(prefers-reduced-motion: reduce)').matches;
   const root = document.documentElement;
   if (motion) root.classList.add('js-motion');
-  if (window.IUXCloud && S.cloud) IUXCloud.init(S.cloud);
 
   /* ---------- body scroll lock (모달/메뉴 중첩 대응) ---------- */
   const locks = new Set();
@@ -55,7 +54,7 @@
   slides.forEach((s, k) => {
     const d = el('div', 'hero__slide');
     d.setAttribute('role', 'group'); d.setAttribute('aria-roledescription', 'slide'); d.setAttribute('aria-label', `${k + 1} / ${slides.length}`);
-    d.innerHTML = `<img src="${esc(s.img)}" alt="" ${k ? 'loading="lazy"' : 'fetchpriority="high"'}>`;
+    d.innerHTML = s.img ? `<img src="${esc(s.img)}" alt="" ${k ? 'loading="lazy"' : 'fetchpriority="high"'}>` : '';
     track.appendChild(d);
   });
   $('#heroTotal').textContent = String(slides.length).padStart(2, '0');
@@ -299,6 +298,8 @@
   const paintPop = () => {
     const p = live[pi];
     pop.dataset.pos = p.pos || 'center';
+    const card = $('.pop__card', pop);
+    if (p.pos === 'custom') { card.style.cssText = `position:absolute;left:${p.x ?? 50}%;top:${p.y ?? 50}%;transform:translate(-${p.x ?? 50}%,-${p.y ?? 50}%)`; } else card.style.cssText = '';
     $('#popImg').src = p.img || ''; $('.pop__img', pop).hidden = !p.img;
     $('#popTitle').textContent = p.title; $('#popText').textContent = p.body;
     const btn = $('#popBtn'); btn.hidden = !p.btn; btn.textContent = p.btn || ''; btn.href = p.link || '#';
