@@ -400,17 +400,24 @@
         : `<h1>관리자 로그인</h1><form class="stack" id="lf" style="gap:16px"><label class="field">이메일<input name="email" type="email" required autocomplete="username"></label><label class="field">비밀번호<input name="password" type="password" required autocomplete="current-password"></label>
         <p class="auth__err" id="err" ${msg ? '' : 'hidden'}>${esc(msg || '')}</p><button class="btn btn--primary btn--block">로그인</button><button type="button" class="linkbtn" id="forgot">비밀번호를 잊으셨나요?</button></form>`}
     </div></section>`;
-    const err = t => { $('#err').textContent = t; $('#err').hidden = false; };
+    const ko = m => /Invalid login/i.test(m) ? '이메일 또는 비밀번호가 올바르지 않습니다.'
+      : /rate limit|security purposes|after \d+ seconds/i.test(m) ? '메일 발송 한도(시간당 약 2통)를 넘었습니다. 1시간 뒤 다시 시도하거나 운영자에게 비밀번호 초기화를 요청해 주세요.'
+      : /not confirmed/i.test(m) ? '이메일 인증이 완료되지 않은 계정입니다.'
+      : /Password should be|weak/i.test(m) ? '비밀번호는 8자 이상으로 입력해 주세요.'
+      : /same.*password|different from the old/i.test(m) ? '이전과 다른 비밀번호를 입력해 주세요.'
+      : m;
+    const err = t => { $('#err').textContent = ko(t); $('#err').hidden = false; };
     $('#lf')?.addEventListener('submit', async e => {
       e.preventDefault(); const f = e.target; f.querySelector('button').disabled = true;
       const { error } = await A.sb.auth.signInWithPassword({ email: f.email.value.trim(), password: f.password.value });
       f.querySelector('button').disabled = false;
-      if (error) err(/Invalid/.test(error.message) ? '이메일 또는 비밀번호가 올바르지 않습니다.' : error.message);
+      if (error) err(error.message);
     });
     $('#forgot')?.addEventListener('click', async () => {
       const email = $('#lf').email.value.trim(); if (!email) return err('이메일을 먼저 입력해 주세요.');
+      if (!confirm(email + ' 로 비밀번호 재설정 메일을 보낼까요?\n(메일은 시간당 약 2통까지만 보낼 수 있습니다)')) return;
       const { error } = await A.sb.auth.resetPasswordForEmail(email, { redirectTo: location.href.split('#')[0] });
-      error ? err(error.message) : A.toast('비밀번호 재설정 메일을 보냈습니다.');
+      error ? err(error.message) : A.toast('비밀번호 재설정 메일을 보냈습니다. 메일함(스팸함 포함)을 확인해 주세요.');
     });
     $('#pwf')?.addEventListener('submit', async e => {
       e.preventDefault();
