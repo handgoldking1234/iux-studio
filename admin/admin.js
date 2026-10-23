@@ -30,7 +30,9 @@
 
   /* ---------- 연결 ---------- */
   if (!CFG.supabaseUrl || !CFG.anonKey || !window.supabase) {
-    $('#auth').hidden = false; $('#loginForm').hidden = true; $('#setupNotice').hidden = false; return;
+    $('#auth').hidden = false; $('#loginForm').hidden = true; $('#setupNotice').hidden = false;
+    if (CFG.supabaseUrl && !window.supabase) $('#setupNotice p').textContent = 'Supabase 라이브러리를 불러오지 못했습니다. 광고 차단 확장 프로그램을 끄거나 잠시 후 새로고침해 주세요.';
+    return;
   }
   const sb = window.supabase.createClient(CFG.supabaseUrl, CFG.anonKey);
   const S = { user: null, role: { admin: false, sites: [] }, sites: [], site: '', booted: false };
