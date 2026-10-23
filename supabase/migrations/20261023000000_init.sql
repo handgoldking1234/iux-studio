@@ -162,6 +162,13 @@ create policy boards_write  on public.boards for all    to authenticated using (
 create policy posts_public on public.posts for select to anon, authenticated using (published or can_manage(site_id));
 create policy posts_write  on public.posts for all    to authenticated using (can_manage(site_id)) with check (can_manage(site_id));
 
+-- 테이블 권한 (프로젝트의 자동 노출 설정과 무관하게 동작하도록 명시. 실제 접근 범위는 위 RLS 정책이 결정)
+grant usage on schema public to anon, authenticated, service_role;
+grant select on public.boards, public.posts to anon;
+grant select, insert, update, delete on public.sites, public.admins, public.site_members, public.inquiries, public.boards, public.posts to authenticated;
+grant all on public.sites, public.admins, public.site_members, public.inquiries, public.boards, public.posts to service_role;
+grant execute on function public.is_admin(), public.can_manage(text) to anon, authenticated;
+
 grant execute on function public.increment_post_view(uuid) to anon, authenticated;
 revoke execute on function public.list_site_members(text), public.add_site_member(text, text) from public, anon;
 grant execute on function public.list_site_members(text), public.add_site_member(text, text), public.my_role() to authenticated;
