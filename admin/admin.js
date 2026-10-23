@@ -242,7 +242,7 @@
   /* =========================================================
      게시판
      ========================================================= */
-  const PB = { board: '', page: 1 };
+  const PB = { board: store.get('iuxc-board') || '', page: 1 };
   const needSite = title => {
     view.innerHTML = `<div class="ph"><h1>${title}</h1></div><div class="card"><p class="empty">위쪽 <b>사이트</b> 선택에서 관리할 사이트를 먼저 골라주세요.</p></div>`;
   };

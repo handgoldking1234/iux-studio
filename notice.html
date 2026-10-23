@@ -48,10 +48,13 @@
 
   <!-- 목록 -->
   <div id="listView">
+    <div class="board__tools">
+    <button type="button" class="btn-write" id="writeBtn" hidden><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>글쓰기</button>
     <form class="board__search" id="searchForm" role="search">
       <input type="search" name="q" placeholder="제목 검색" aria-label="제목 검색">
       <button type="submit" aria-label="검색"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></button>
     </form>
+    </div>
     <ul class="board__list" id="postList"></ul>
     <nav class="pager" id="pager" aria-label="페이지"></nav>
   </div>
@@ -64,7 +67,7 @@
     </header>
     <img class="post__cover" id="postCover" alt="" hidden>
     <div class="post__body md" id="postBody"></div>
-    <div class="post__foot"><a href="notice.html" class="btn-line btn-line--grey" id="backBtn">목록으로</a></div>
+    <div class="post__foot"><a href="notice.html" class="btn-line btn-line--grey" id="backBtn">목록으로</a><button type="button" class="btn-write" id="editBtn" hidden>수정</button></div>
   </article>
 </main>
 

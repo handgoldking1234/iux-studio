@@ -17,6 +17,20 @@
   if (S?.cloud) C.init(S.cloud);
   if (!C.ready) { msg('게시판을 준비 중입니다.'); return; }
 
+  /* 관리자로 로그인한 브라우저에서만 글쓰기 · 수정 바로가기 표시 (실제 권한 확인은 관리자 페이지에서) */
+  const admin = (() => {
+    try {
+      const ref = new URL(S.cloud.url).hostname.split('.')[0];
+      const t = JSON.parse(localStorage.getItem(`sb-${ref}-auth-token`) || 'null');
+      return !!(t && t.access_token && (!t.expires_at || t.expires_at * 1000 > Date.now() - 7 * 864e5));
+    } catch (_) { return false; }
+  })();
+  const toAdmin = hash => { try { localStorage.setItem('iuxc-site', S.cloud.siteId); localStorage.setItem('iuxc-board', board); } catch (_) {} location.href = 'admin/' + hash; };
+  if (admin) {
+    $('#writeBtn').hidden = false;
+    $('#writeBtn').addEventListener('click', () => toAdmin('#posts/new'));
+  }
+
   C.getBoard(board).then(b => { if (b) { $('#boardTitle').textContent = b.name; document.title = `${b.name} — ${S.company.name}`; } });
 
   async function showList() {
@@ -50,6 +64,7 @@
     $('#postMeta').textContent = `${fmt(p.created_at)} · 조회 ${p.views + 1}`;
     const cv = $('#postCover'); cv.hidden = !p.cover_url; if (p.cover_url) cv.src = p.cover_url;
     $('#postBody').innerHTML = C.md(p.body);
+    if (admin) { const e = $('#editBtn'); e.hidden = false; e.onclick = () => toAdmin('#posts/' + p.id); }
     if (document.referrer.includes('notice.html') && !document.referrer.includes('id=')) $('#backBtn').href = document.referrer;
   }
 
