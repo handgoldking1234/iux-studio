@@ -21,10 +21,11 @@ python3 -m http.server 8000   # http://localhost:8000
 - `hero.slides` : 메인 슬라이드 문구·배경 이미지
 - `works` : 포트폴리오. `img` 없으면 플레이스홀더, `link` 를 넣으면 클릭 시 새 창으로 사이트 열림
 - `popups` : 공지 팝업 (노출 기간 `from`/`to`, `on:false` 로 끄기)
-- `formEndpoint` : 문의 폼 전송 주소
+- `web3formsKey` : 문의 폼 수신 키 (https://web3forms.com 에서 무료 발급)
 
 ## 문의 폼
-- `formEndpoint` 가 비어 있으면 작성 내용이 채워진 메일 작성 창(mailto)이 열립니다.
+- `web3formsKey` 를 넣으면 견적 문의·이메일 문의가 키를 발급받은 메일로 바로 도착합니다.
+- 키가 비어 있으면 작성 내용이 채워진 메일 작성 창(mailto)이 열립니다.
 - [Formspree](https://formspree.io) 같은 폼 수신 서비스 주소를 넣으면 페이지에서 바로 전송됩니다.
 
 ## 배포

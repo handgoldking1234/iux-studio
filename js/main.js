@@ -233,7 +233,12 @@
 
     submitBtn.disabled = true;
     try {
-      if (S.formEndpoint) {
+      if (S.web3formsKey) {
+        const r = await fetch('https://api.web3forms.com/submit', { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify({ access_key: S.web3formsKey, subject, from_name: 'IUX.STUDIO 홈페이지', replyto: data.이메일, ...data }) });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok || !j.success) throw new Error(j.message || r.status);
+        $('#sentMsg').textContent = '영업일 기준 1일 이내에 담당자가 연락드립니다.';
+      } else if (S.formEndpoint) {
         const r = await fetch(S.formEndpoint, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify({ _subject: subject, _replyto: data.이메일, ...data }) });
         if (!r.ok) throw new Error(r.status);
         $('#sentMsg').textContent = '영업일 기준 1일 이내에 담당자가 연락드립니다.';

@@ -11,10 +11,12 @@ window.SITE = {
     bizNo: ''                     // 예: '000-00-00000'
   },
 
-  /* 문의 폼 전송 주소
-     - 비워두면: 작성 내용을 담은 메일 작성 창(mailto)이 열립니다.
-     - Formspree 등 폼 수신 서비스 주소를 넣으면 해당 주소로 전송됩니다.
-       예) 'https://formspree.io/f/xxxxxxx' */
+  /* 문의 폼 수신 설정 (견적 문의 · 이메일 문의 공통)
+     1순위 web3formsKey : https://web3forms.com 에서 받는 Access Key.
+                          키를 발급받은 이메일로 문의 내용이 바로 도착합니다.
+     2순위 formEndpoint : Formspree 등 다른 폼 서비스 주소 (예: 'https://formspree.io/f/xxxxxxx')
+     둘 다 비워두면 작성 내용이 담긴 메일 작성 창(mailto)이 열립니다. */
+  web3formsKey: '',
   formEndpoint: '',
 
   hero: {
