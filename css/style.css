@@ -259,7 +259,7 @@ svg{flex:none}
 .form__foot{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:16px}
 .agree{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--mute);cursor:pointer}
 .agree input{width:18px;height:18px;accent-color:var(--blue)}
-.btn-submit{border:0;cursor:pointer;background:var(--blue);padding:18px 40px;border-radius:500px;font-size:13px;font-weight:800;letter-spacing:1.6px;transition:background .15s,transform .15s}
+.btn-submit{border:0;cursor:pointer;background:var(--blue);color:#fff;padding:18px 40px;border-radius:500px;font-size:13px;font-weight:800;letter-spacing:1.6px;transition:background .15s,transform .15s}
 .btn-submit:hover{background:var(--blue2);transform:scale(1.04)}
 .btn-submit:active{transform:scale(.97)}
 .btn-submit:disabled{opacity:.6;cursor:wait;transform:none}
