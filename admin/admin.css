@@ -368,7 +368,7 @@ svg.i--xs{width:14px;height:14px;stroke-width:2}
 .slidecard .field input,.slidecard .field textarea{background:var(--s1)}
 .workcard{padding:14px;border-radius:8px;background:var(--s2);display:flex;flex-direction:column;gap:10px}
 .workcard .drop{aspect-ratio:16/9;background:var(--s3)}
-.workcard .inp,.workcard select{background:var(--s1)}
+.workcard .inp,.workcard select{background-color:var(--s1)}
 .workcard .row{flex-wrap:nowrap}
 .workcard select{flex:1;min-width:0}
 .preview{border-radius:8px;overflow:hidden;box-shadow:inset 0 0 0 1px var(--line)}
@@ -412,7 +412,7 @@ svg.i--xs{width:14px;height:14px;stroke-width:2}
 .tag--off{background:var(--s3);color:var(--t3)}
 .block{display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:10px;align-items:start;padding:14px;border-radius:8px;background:var(--s2)}
 .block>b{padding-top:12px;font-size:13px;color:var(--t3);text-align:center}
-.block .inp{background:var(--s1)}
+.block .inp{background-color:var(--s1)}
 .popcard{display:flex;flex-direction:column;gap:6px;padding:16px;border:0;border-radius:8px;background:var(--s1);text-align:left;box-shadow:inset 0 0 0 1px transparent}
 .popcard.is-on{box-shadow:inset 0 0 0 2px var(--blue)}
 .popcard b{font-size:15px;display:flex;justify-content:space-between;gap:8px;align-items:center}
