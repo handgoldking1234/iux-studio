@@ -72,9 +72,9 @@ window.SITE = {
   works: [
     { name: '암갈색의 경성', cat: '브랜드', img: 'assets/img/work-gyeongseong.jpg' },
     { name: 'IUX SYSTEM', cat: '기업', img: 'assets/img/work-iux-system.jpg' },
-    { name: 'IUX Holdings', cat: '기업', img: 'assets/img/work-iux-holdings.jpg' },
-    { name: '샘플 04', cat: '기업' },
-    { name: '샘플 05', cat: '랜딩' },
+    { name: 'IUX Holdings', cat: '기업', img: 'assets/img/work-iux-holdings.jpg', link: 'samples/iux-holdings/' },
+    { name: 'IUX성형외과', cat: '병원', img: 'assets/img/work-iux-plastic-surgery.jpg', link: 'samples/iux-plastic-surgery/' },
+    { name: '미소치과의원', cat: '병원', img: 'assets/img/work-miso-dental.jpg', link: 'samples/miso-dental/' },
     { name: '샘플 06', cat: '브랜드' },
     { name: '샘플 07', cat: '기업' },
     { name: '샘플 08', cat: '쇼핑몰' },
