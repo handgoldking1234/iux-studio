@@ -209,13 +209,11 @@
         <button class="iconbtn only-m" data-qopen title="검색">${I('search')}</button>
         <div class="rel" style="margin-right:6px"><button class="iconbtn" data-noti title="알림">${I('bell')}<span class="badge-dot" id="notiDot" hidden></span></button><div id="notiPop"></div></div>
         <div class="rel"><button class="userbtn" data-user title="내 계정"><span class="avatar avatar--round">${esc(A.initial(name))}</span><span class="userbtn__txt"><b>${esc(name)}</b><small>${client ? '사이트 관리자' : '전체 권한'}</small></span><svg class="i i--xs" viewBox="0 0 24 24"><path d="${P.chev}"/></svg></button><div id="userPop"></div></div>
-        <button class="iconbtn" data-logout title="로그아웃">${I('logout')}</button>
       </div>`;
     hd.querySelector('[data-side]').onclick = () => {
       if (matchMedia('(max-width:1023px)').matches) $('.app').classList.toggle('is-open');
       else { S.mini = !S.mini; store.set('iuxadm-side', S.mini ? '1' : '0'); $('.app').classList.toggle('is-mini', S.mini); }
     };
-    hd.querySelector('[data-logout]').onclick = () => A.sb.auth.signOut();
     hd.querySelector('[data-noti]').onclick = () => toggleNoti();
     hd.querySelector('[data-user]').onclick = () => toggleUser();
     hd.querySelector('[data-qopen]').onclick = () => { $('#hdSearch').classList.add('is-open'); $('#q').focus(); };
