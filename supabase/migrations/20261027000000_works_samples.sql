@@ -1,10 +1,12 @@
--- 포트폴리오(works)에 샘플 사이트 연결: IUX Holdings 링크 + IUX성형외과 · 미소치과의원 · 이음새 추가
+-- 포트폴리오(works)에 샘플 사이트 연결: IUX SYSTEM · IUX Holdings 링크 +IUX성형외과 · 미소치과의원 · 이음새 추가
 -- IUX Holdings 바로 뒤(없으면 이미지가 있는 마지막 항목 뒤)에 넣고,
 -- 자리 표시용 '샘플 04' · '샘플 05' · '샘플 06' 과 관리자에서 만든 빈 '새 프로젝트'(링크 없음)는 뺍니다.
 -- SQL Editor 에서 한 번 실행하세요. (여러 번 실행해도 안전)
 with w as (
-  select o, case when x->>'name' = 'IUX Holdings' and coalesce(x->>'link', '') = ''
-                 then x || '{"link": "https://iux-studio.vercel.app/samples/iux-holdings/"}'::jsonb else x end as x
+  select o, case when coalesce(x->>'link', '') <> '' then x
+                 when x->>'name' = 'IUX Holdings' then x || '{"link": "https://iux-studio.vercel.app/samples/iux-holdings/"}'::jsonb
+                 when x->>'name' = 'IUX SYSTEM' then x || '{"link": "https://iux-studio.vercel.app/samples/iux-system/"}'::jsonb
+                 else x end as x
   from public.sites s, jsonb_array_elements(s.content->'works') with ordinality t(x, o)
   where s.id = 'iux-studio'
     and x->>'name' not in ('IUX성형외과', '미소치과의원', '이음새', '샘플 04', '샘플 05', '샘플 06')
