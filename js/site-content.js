@@ -21,7 +21,8 @@ window.SiteReady = (async () => {
   /* ---------- 콘텐츠 ---------- */
   if (Array.isArray(c.hero) && c.hero.length) S.hero.slides = c.hero.map(h => ({ cat: h.cat || '', title: h.title || '', desc: h.desc || '', img: h.img || '', link: h.link || '', btn: h.btn || '', newTab: !!h.newTab }));
   if (Array.isArray(c.works)) {
-    const list = c.works.map(w => ({ name: w.name || '프로젝트', cat: w.cat || '', img: w.img || '', link: w.link || '' }));
+    const hide = S.worksHide || [];
+    const list = c.works.filter(w => !hide.includes(w.name)).map(w => ({ name: w.name || '프로젝트', cat: w.cat || '', img: w.img || '', link: w.link || '' }));
     // js/content.js 의 샘플 사이트(link 있는 항목): 같은 이름이면 링크를 채우고, 없으면 링크 달린 마지막 항목 뒤에 추가
     list.forEach(w => { if (!w.link) w.link = S.works.find(b => b.name === w.name)?.link || ''; });
     const extra = S.works.filter(b => b.link && !list.some(w => w.name === b.name));
