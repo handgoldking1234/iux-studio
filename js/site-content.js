@@ -20,7 +20,15 @@ window.SiteReady = (async () => {
 
   /* ---------- 콘텐츠 ---------- */
   if (Array.isArray(c.hero) && c.hero.length) S.hero.slides = c.hero.map(h => ({ cat: h.cat || '', title: h.title || '', desc: h.desc || '', img: h.img || '', link: h.link || '', btn: h.btn || '', newTab: !!h.newTab }));
-  if (Array.isArray(c.works)) S.works = c.works.map(w => ({ name: w.name || '프로젝트', cat: w.cat || '', img: w.img || '', link: w.link || '' }));
+  if (Array.isArray(c.works)) {
+    const list = c.works.map(w => ({ name: w.name || '프로젝트', cat: w.cat || '', img: w.img || '', link: w.link || '' }));
+    // js/content.js 의 샘플 사이트(link 있는 항목): 같은 이름이면 링크를 채우고, 없으면 링크 달린 마지막 항목 뒤에 추가
+    list.forEach(w => { if (!w.link) w.link = S.works.find(b => b.name === w.name)?.link || ''; });
+    const extra = S.works.filter(b => b.link && !list.some(w => w.name === b.name));
+    const last = list.map(w => !!w.link).lastIndexOf(true);
+    list.splice(last + 1, 0, ...extra);
+    S.works = list;
+  }
   if (Array.isArray(c.marquee) && c.marquee.length) S.marquee = c.marquee.filter(Boolean);
   if (c.sections) ['services', 'process', 'about', 'cta'].forEach(k => { if (c.sections[k]) S.sections[k] = c.sections[k]; });
   if (c.company) Object.keys(c.company).forEach(k => { if (c.company[k]) S.company[k] = c.company[k]; });
