@@ -288,7 +288,7 @@ svg.i--xs{width:14px;height:14px;stroke-width:2}
 .pill{display:inline-flex;align-items:center;height:26px;padding:0 12px;border-radius:500px;font-size:12px;font-weight:800;white-space:nowrap;background:var(--s3);color:var(--t2)}
 .pill--new{background:var(--blue);color:#fff}
 .pill--progress{background:#5b8cff;color:#fff}
-.pill--quote{background:var(--warn);color:#121212}
+.pill--quote{background:var(--warn);color:#fff}
 .pill--contract{background:var(--t1);color:var(--inv)}
 .pill--done{background:var(--range);color:var(--blue)}
 .pill--spam{background:var(--negbg);color:var(--neg)}
