@@ -48,6 +48,36 @@
   $$('a', mmenu).forEach(a => a.addEventListener('click', () => setMenu(false)));
   matchMedia('(min-width:960px)').addEventListener('change', e => { if (e.matches) setMenu(false); });
 
+  /* ---------- 앵커 부드러운 스크롤 (거리 비례 시간 + ease-in-out) ---------- */
+  let scrollAnim = 0;
+  const stopScroll = () => { cancelAnimationFrame(scrollAnim); scrollAnim = 0; root.style.scrollBehavior = ''; };
+  ['wheel', 'touchstart', 'keydown'].forEach(t => addEventListener(t, () => scrollAnim && stopScroll(), { passive: true }));
+  const smoothTo = y => {
+    stopScroll();
+    const from = scrollY, dist = y - from;
+    if (Math.abs(dist) < 2) return;
+    const dur = Math.min(1100, Math.max(500, Math.abs(dist) * 0.35)), t0 = performance.now();
+    const ease = p => p < .5 ? 4 * p * p * p : 1 - (-2 * p + 2) ** 3 / 2;
+    root.style.scrollBehavior = 'auto'; // CSS smooth 와 겹치지 않게
+    const step = now => {
+      const p = Math.min(1, (now - t0) / dur);
+      scrollTo(0, from + dist * ease(p));
+      p < 1 ? (scrollAnim = requestAnimationFrame(step)) : stopScroll();
+    };
+    scrollAnim = requestAnimationFrame(step);
+  };
+  document.addEventListener('click', e => {
+    const a = e.target.closest('a[href^="#"]');
+    if (!motion || !a || e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey) return;
+    const id = a.getAttribute('href').slice(1);
+    const target = id === 'top' ? root : id && document.getElementById(id);
+    if (!target) return;
+    e.preventDefault();
+    const y = id === 'top' ? 0 : target.getBoundingClientRect().top + scrollY - header.offsetHeight;
+    smoothTo(Math.min(Math.max(0, y), root.scrollHeight - innerHeight));
+    history.pushState(null, '', '#' + id);
+  });
+
   /* ---------- 히어로 슬라이더 ---------- */
   const H = S.hero, slides = H.slides;
   const track = $('#heroTrack'), prog = $('#heroProgress');
