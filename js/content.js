@@ -70,7 +70,6 @@ window.SITE = {
   /* 포트폴리오: img 가 없으면 플레이스홀더로 표시됩니다.
      link 를 넣으면 클릭 시 해당 사이트가 새 창으로 열리고, 없으면 이미지 미리보기가 열립니다. */
   works: [
-    { name: '암갈색의 경성', cat: '브랜드', img: 'assets/img/work-gyeongseong.jpg' },
     { name: 'IUX SYSTEM', cat: '기업', img: 'assets/img/work-iux-system.jpg', link: 'samples/iux-system/' },
     { name: 'IUX Holdings', cat: '기업', img: 'assets/img/work-iux-holdings.jpg', link: 'samples/iux-holdings/' },
     { name: 'IUX성형외과', cat: '병원', img: 'assets/img/work-iux-plastic-surgery.jpg', link: 'samples/iux-plastic-surgery/' },
