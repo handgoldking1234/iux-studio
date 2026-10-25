@@ -3,6 +3,15 @@
 window.SiteReady = (async () => {
   'use strict';
   const S = window.SITE;
+
+  /* ---------- 맨 위로 버튼 (모든 페이지 공통, 조금 내리면 나타남) ---------- */
+  const top = document.createElement('a');
+  top.className = 'totop'; top.href = '#top'; top.setAttribute('aria-label', '맨 위로');
+  top.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+  document.body.appendChild(top);
+  const onTop = () => top.classList.toggle('is-on', scrollY > 400);
+  addEventListener('scroll', onTop, { passive: true }); onTop();
+
   if (window.IUXCloud && S.cloud) IUXCloud.init(S.cloud);
   if (!window.IUXCloud?.ready) return S;
   const r = await Promise.race([IUXCloud.getSite(), new Promise(res => setTimeout(() => res(null), 2500))]);
