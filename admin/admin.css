@@ -192,6 +192,9 @@ svg.i--xs{width:14px;height:14px;stroke-width:2}
 .ph{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:16px 24px;margin-bottom:24px}
 .ph__crumb{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--t2);margin-bottom:8px}
 .ph__crumb small{color:var(--t3)}
+.ph__site{display:inline-flex;align-items:center;gap:4px;color:var(--t3);transition:color .15s}
+.ph__site:hover{color:var(--blue)}
+.ph__site .i--sm{width:13px;height:13px}
 .ph__t{display:flex;align-items:center;flex-wrap:wrap;gap:16px}
 .ph h1{font-size:30px;font-weight:800;letter-spacing:-.03em}
 .ph p.sub{margin-top:8px;font-size:13px;color:var(--t2)}

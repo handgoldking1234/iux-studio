@@ -1,6 +1,6 @@
 # IUX.STUDIO 홈페이지 + IUX Cloud
 
-- **홈페이지**: Claude Design 시안(`AIOX Lab Site`)을 구현한 정적 사이트 (GitHub Pages)
+- **홈페이지**: Claude Design 시안(`AIOX Lab Site`)을 구현한 정적 사이트 (Vercel · iux-studio.vercel.app)
 - **IUX Cloud**: 여러 고객사 홈페이지가 함께 쓰는 문의 · 게시판 백엔드 (Supabase + Resend)
 - **관리자 페이지**: `/admin` — Claude Design 'IUXSTUDIO Admin' 시안 기준 슈퍼 어드민 (전체 현황 · 사이트 제작 · 도메인/호스팅 · 방문 통계 · 콘텐츠 · SEO · 문의 · 게시판 · 계정)
 

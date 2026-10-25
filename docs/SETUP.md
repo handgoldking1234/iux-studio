@@ -52,7 +52,7 @@
 3. **Authentication → Sign In / Providers** 에서 **Allow new users to sign up** 을 끕니다.
    (아무나 가입하지 못하게. 계정은 운영자가 직접 만들거나 초대합니다)
 4. **Authentication → URL Configuration**
-   - **Site URL**: `https://handgoldking1234.github.io/iux-studio/admin/`
+   - **Site URL**: `https://iux-studio.vercel.app/admin/`
    - **Redirect URLs** 에도 같은 주소 추가 (비밀번호 재설정 · 초대 메일 링크용)
 
 ## 4. 메일 발송 준비 (Resend)
@@ -92,12 +92,12 @@ anonKey: 'eyJ...',
 cloud: { url: 'https://abcdefgh.supabase.co', anonKey: 'eyJ...', siteId: 'iux-studio' },
 ```
 
-커밋 · 푸시하면 GitHub Pages 에 반영됩니다.
+커밋 · 푸시하면 Vercel(iux-studio.vercel.app) 에 반영됩니다.
 
 ## 7. 확인
 
-1. `https://handgoldking1234.github.io/iux-studio/admin/` 에서 로그인
-2. **사이트 관리 → IUX.STUDIO** 에서 **문의 알림 메일** 입력 · 허용 도메인에 `https://handgoldking1234.github.io` 입력 → 저장
+1. `https://iux-studio.vercel.app/admin/` 에서 로그인
+2. **사이트 관리 → IUX.STUDIO** 에서 **문의 알림 메일** 입력 · 허용 도메인에 `https://iux-studio.vercel.app` 입력 → 저장
 3. 홈페이지에서 견적 문의를 보내보고 → 관리자 **문의함** 과 메일함 확인
 4. **게시판 → 글쓰기** 로 공지를 올리고 → 홈페이지 하단 NOTICE · `notice.html` 확인
 
@@ -158,7 +158,7 @@ cloud: { url: 'https://abcdefgh.supabase.co', anonKey: 'eyJ...', siteId: 'iux-st
 1. **SQL**: `supabase/migrations/20261025000000_board_v3.sql` 실행 (한 번만)
 2. **함수 배포**: Edge Functions → Deploy a new function → Via Editor → 이름 **`board`**, `supabase/functions/board/index.ts` 붙여넣고 Deploy → Settings 에서 **Verify JWT 끄기**
 3. **Turnstile 키 발급**: https://dash.cloudflare.com 가입 → **Turnstile → Add widget**
-   - Widget name: `iux-cloud`, Hostnames: `handgoldking1234.github.io` (고객사 도메인도 추가), Widget mode: **Managed**
+   - Widget name: `iux-cloud`, Hostnames: `iux-studio.vercel.app` (고객사 도메인도 추가), Widget mode: **Managed**
    - 발급된 **Site Key** → 관리자 **사이트 설정 → 로봇 방지 사이트 키** 에 입력 · 저장
    - 발급된 **Secret Key** → Supabase **Edge Functions → Secrets** 에 `TURNSTILE_SECRET` 으로 저장
 4. **게시판 만들기**: 사이트 설정 → 게시판 → 추가 → **설정** 에서 분류 · 방문자 글쓰기 · 댓글 · 메뉴 표시

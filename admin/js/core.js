@@ -366,7 +366,7 @@
   };
   A.siteHead = (title, { open = true, extra = '' } = {}) => {
     const s = A.site(); if (!s) return '';
-    return `<div class="ph"><div><div class="ph__crumb"><span>${esc(s.name)}</span><small>${esc(s.domain || '')}</small><span class="stage stage--${s.stage}">${A.STAGE[s.stage]}</span></div>
+    return `<div class="ph"><div><div class="ph__crumb"><span>${esc(s.name)}</span>${s.domain ? `<a class="ph__site" href="https://${esc(s.domain.replace(/\/+$/, ''))}/" target="_blank" rel="noopener" title="홈페이지 바로가기">${esc(s.domain)}${I('ext', 'i--sm')}</a>` : ''}<span class="stage stage--${s.stage}">${A.STAGE[s.stage]}</span></div>
       <div class="ph__t"><h1>${esc(title)}</h1>${open && !A.isClient() ? `<button class="btn btn--line btn--sm" data-preview>고객 어드민 열기</button>` : ''}</div></div>${extra}</div>`;
   };
   A.bindHead = root => root.querySelector('[data-preview]')?.addEventListener('click', () => { S.preview = S.siteId; A.go(A.siteHash(S.tab)); A.toast('고객사 담당자에게 보이는 화면입니다.'); });

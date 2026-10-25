@@ -1,7 +1,7 @@
 /* =========================================================
    IUX Cloud 클라이언트 — 모든 고객사 홈페이지에 공통으로 넣는 스크립트
    사용법:
-     <script src="https://handgoldking1234.github.io/iux-studio/js/iux-cloud.js"></script>
+     <script src="https://iux-studio.vercel.app/js/iux-cloud.js"></script>
      IUXCloud.init({ url: 'https://xxxx.supabase.co', anonKey: 'eyJ...', siteId: 'clinic-abc' });
      await IUXCloud.sendInquiry({ kind: 'quote', name, phone, email, message, ... });
      const { items, total } = await IUXCloud.listPosts('notice', { page: 1, size: 10 });
