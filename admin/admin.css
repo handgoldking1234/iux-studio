@@ -324,7 +324,7 @@ svg.i--xs{width:14px;height:14px;stroke-width:2}
 .modal__h h2{font-size:20px;font-weight:800}
 .modal__b{flex:1;min-height:0;overflow-y:auto;padding:4px 24px 24px;display:flex;flex-direction:column;gap:16px}
 .modal__f{display:flex;justify-content:flex-end;gap:8px;padding:16px 24px;border-top:1px solid var(--line)}
-.picklist{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr));gap:8px}
+.picklist{display:grid;grid-template-columns:1fr;gap:8px}
 .picklist button{display:flex;align-items:center;gap:12px;padding:12px;border:0;border-radius:8px;background:var(--s2);text-align:left;transition:background .15s}
 .picklist button:hover{background:var(--s3)}
 .picklist button.is-on{box-shadow:inset 0 0 0 2px var(--blue)}
