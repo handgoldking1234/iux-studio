@@ -70,11 +70,11 @@ window.SITE = {
   /* 포트폴리오: img 가 없으면 플레이스홀더로 표시됩니다.
      link 를 넣으면 클릭 시 해당 사이트가 새 창으로 열리고, 없으면 이미지 미리보기가 열립니다. */
   works: [
-    { name: 'IUX SYSTEM', cat: '기업', img: 'assets/img/work-iux-system.jpg', link: 'samples/iux-system/' },
-    { name: 'IUX Holdings', cat: '기업', img: 'assets/img/work-iux-holdings.jpg', link: 'samples/iux-holdings/' },
-    { name: 'IUX성형외과', cat: '병원', img: 'assets/img/work-iux-plastic-surgery.jpg', link: 'samples/iux-plastic-surgery/' },
-    { name: '미소치과의원', cat: '병원', img: 'assets/img/work-miso-dental.jpg', link: 'samples/miso-dental/' },
-    { name: '이음새', cat: '기업', img: 'assets/img/work-ieumsae.jpg', link: 'samples/ieumsae/' },
+    { name: 'IUX SYSTEM', cat: '기업', img: 'assets/img/work-iux-system.jpg', link: 'samples/?s=iux-system' },
+    { name: 'IUX Holdings', cat: '기업', img: 'assets/img/work-iux-holdings.jpg', link: 'samples/?s=iux-holdings' },
+    { name: 'IUX성형외과', cat: '병원', img: 'assets/img/work-iux-plastic-surgery.jpg', link: 'samples/?s=iux-plastic-surgery' },
+    { name: '미소치과의원', cat: '병원', img: 'assets/img/work-miso-dental.jpg', link: 'samples/?s=miso-dental' },
+    { name: '이음새', cat: '기업', img: 'assets/img/work-ieumsae.jpg', link: 'samples/?s=ieumsae' },
     { name: '샘플 07', cat: '기업' },
     { name: '샘플 08', cat: '쇼핑몰' },
     { name: '샘플 09', cat: '병원' },
