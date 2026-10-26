@@ -76,7 +76,7 @@ window.SITE = {
     { name: 'IUX성형외과', cat: '병원', img: 'assets/img/work-iux-plastic-surgery.jpg', link: 'samples/?s=iux-plastic-surgery' },
     { name: '미소치과의원', cat: '병원', img: 'assets/img/work-miso-dental.jpg', link: 'samples/?s=miso-dental' },
     { name: '이음새', cat: '기업', img: 'assets/img/work-ieumsae.jpg', link: 'samples/?s=ieumsae' },
-    { name: '샘플 07', cat: '기업' },
+    { name: 'E-BOOK', cat: '기업', img: 'assets/img/work-ebook.jpg', link: 'samples/?s=ebook' },
     { name: '샘플 08', cat: '쇼핑몰' },
     { name: '샘플 09', cat: '병원' },
     { name: '샘플 10', cat: '병원' }

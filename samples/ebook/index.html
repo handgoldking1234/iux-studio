@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>E-BOOK</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+<style>
+:root{ --bg:#f2f2f2; --ink:#222; --sub:#888; --line:#e5e5e5; --accent:#4a7fd1; --panel:300px; --s:1; }
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:Pretendard,'Noto Sans KR',sans-serif;overflow:hidden;user-select:none;-webkit-user-select:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+button svg{pointer-events:none}
+.ico{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+
+/* ===== 책 영역 ===== */
+.stage{position:fixed;top:0;left:0;bottom:0;right:0;display:flex;align-items:center;justify-content:center;overflow:hidden;transition:right .3s ease}
+body.menu-open .stage{right:var(--panel)}
+.zoomer{transition:transform .25s ease;will-change:transform}
+.stage.dragging .zoomer{transition:none}
+.page{background:#fff;overflow:hidden}
+.page .pc{width:420px;height:594px;transform-origin:0 0;transform:scale(var(--s));position:relative}
+.page img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+.stf__block{box-shadow:0 2px 14px rgba(0,0,0,.12)}
+/* 펼침면 가운데 접힘 그림자 */
+.stf__item.--left::after,.stf__item.--right::after{content:"";position:absolute;top:0;bottom:0;width:10%;pointer-events:none;z-index:2}
+.stf__item.--left::after{right:0;background:linear-gradient(270deg,rgba(0,0,0,.14),rgba(0,0,0,0))}
+.stf__item.--right::after{left:0;background:linear-gradient(90deg,rgba(0,0,0,.16),rgba(0,0,0,0))}
+/* 페이지 상단 북마크 리본 */
+.bm{position:absolute;top:0;left:50%;width:calc(34px*var(--s));height:calc(40px*var(--s));min-width:18px;min-height:22px;
+  transform:translateX(-50%);z-index:3;opacity:.35;transition:opacity .2s}
+.bm::before{content:"";position:absolute;inset:0;background:#555;clip-path:polygon(0 0,100% 0,100% 100%,50% 76%,0 100%)}
+.bm:hover{opacity:.7}
+.bm.on{opacity:1}.bm.on::before{background:var(--accent)}
+/* 확대 시 끌어서 이동 */
+.pan{position:absolute;inset:0;z-index:5;display:none;cursor:grab}
+.stage.zoomed .pan{display:block}
+.stage.dragging .pan{cursor:grabbing}
+
+/* 좌우 화살표 */
+.arrow{position:absolute;top:50%;transform:translateY(-50%);width:56px;height:80px;display:grid;place-items:center;color:#444;z-index:6;transition:opacity .2s}
+.arrow .ico{width:34px;height:34px;stroke-width:1.4}
+.arrow.prev{left:3%}.arrow.next{right:3%}
+.arrow[disabled]{opacity:0;pointer-events:none}
+
+/* 우상단 버튼 (메뉴 닫힘 상태) */
+.corner{position:fixed;top:6px;right:16px;display:flex;gap:6px;z-index:20;transition:opacity .2s}
+.corner button{width:40px;height:40px;background:#fff;border-radius:4px;display:grid;place-items:center;color:#444;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+body.menu-open .corner{opacity:0;pointer-events:none}
+
+/* 확대 슬라이더 */
+.zoombar{position:fixed;right:16px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;z-index:20;transition:right .3s ease}
+body.menu-open .zoombar{right:calc(var(--panel) + 16px)}
+.zoombar .zb{width:34px;height:30px;border-radius:3px;background:#444;color:#fff;font-size:20px;font-weight:700;display:grid;place-items:center;line-height:1}
+.zoombar .track{width:30px;height:120px;position:relative}
+.zoombar input{position:absolute;left:50%;top:50%;width:120px;transform:translate(-50%,-50%) rotate(-90deg);accent-color:#888}
+.zoombar .pct{font-size:11px;background:var(--accent);color:#fff;padding:7px 4px;border-radius:3px;min-width:34px;text-align:center}
+
+/* ===== 사이드 메뉴 ===== */
+.panel{position:fixed;top:0;right:0;bottom:0;width:var(--panel);background:#fff;z-index:40;display:flex;flex-direction:column;
+  transform:translateX(100%);transition:transform .3s ease;box-shadow:-2px 0 12px rgba(0,0,0,.05)}
+body.menu-open .panel{transform:none}
+.p-top{display:flex;align-items:center;gap:8px;padding:12px 16px 8px 20px}
+.p-top button{width:36px;height:36px;display:grid;place-items:center;color:#444}
+.p-top .p-gap{flex:1}
+.p-search{margin:8px 20px 12px;display:flex;align-items:center;background:#f3f3f3;border-radius:4px;padding:0 10px}
+.p-search input{flex:1;height:36px;border:0;background:none;font:inherit;font-size:14px;outline:none;min-width:0}
+.p-search button{color:#888;display:grid;place-items:center}
+.p-search .ico{width:20px;height:20px}
+.menu{list-style:none;padding:0 12px}
+.menu > li > button{width:100%;display:flex;align-items:center;gap:20px;padding:13px 10px;font-size:17px;color:#222;border-radius:6px;text-align:left}
+.menu > li > button:hover{background:#f6f6f6}
+.menu > li > button.on{color:var(--accent)}
+.sub{list-style:none;margin:0 10px 8px 54px;max-height:260px;overflow:auto;display:none}
+.sub.open{display:block}
+.sub li button{width:100%;display:flex;justify-content:space-between;gap:10px;padding:8px 6px;font-size:14px;color:#444;text-align:left;border-bottom:1px solid #f1f1f1}
+.sub li button:hover{color:var(--accent)}
+.sub li em{font-style:normal;color:#aaa;font-size:12px;flex:none}
+.sub li mark{background:#fff3a6}
+.sub .empty{font-size:13px;color:#aaa;padding:8px 6px}
+.p-body{flex:1;overflow:auto}
+.pager{display:flex;align-items:center;gap:6px;padding:16px 20px 22px;justify-content:center}
+.pager button{width:30px;height:30px;border:1px solid #ddd;border-radius:3px;display:grid;place-items:center;color:#444;background:#fff}
+.pager button[disabled]{opacity:.35;pointer-events:none}
+.pager .ico{width:16px;height:16px;stroke-width:2}
+.pager input{width:96px;height:30px;border:1px solid #ddd;border-radius:15px;text-align:center;font:inherit;font-size:13px;font-weight:600;outline:none}
+.pager input:focus{border-color:var(--accent)}
+
+/* 썸네일 전체 보기 */
+.thumbs{position:fixed;inset:0;background:rgba(20,22,26,.94);z-index:60;display:none;flex-direction:column}
+.thumbs.open{display:flex}
+.thumbs header{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;color:#fff;font-size:16px}
+.thumbs header button{color:#fff;width:40px;height:40px;display:grid;place-items:center}
+.t-grid{flex:1;overflow:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:22px;padding:10px 28px 40px;align-content:start}
+.th{cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;color:#aab;font-size:12px}
+.th .tp{width:105px;height:148px;background:#fff;overflow:hidden;position:relative;outline:2px solid transparent;outline-offset:3px}
+.th .tp .pc{width:420px;height:594px;transform-origin:0 0;transform:scale(.25);position:relative}
+.th .tp img{width:100%;height:100%;object-fit:cover}
+.th:hover .tp{outline-color:rgba(255,255,255,.4)}
+.th.cur .tp{outline-color:var(--accent)}.th.cur{color:#fff}
+
+.toast{position:fixed;left:50%;bottom:40px;transform:translate(-50%,20px);background:rgba(0,0,0,.8);color:#fff;font-size:14px;
+  padding:10px 18px;border-radius:20px;opacity:0;transition:.25s;z-index:80;pointer-events:none}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+#printArea{display:none}
+@media print{
+  @page{size:A4 portrait;margin:0}
+  body{background:#fff}
+  body > *:not(#printArea){display:none !important}
+  #printArea{display:block}
+  #printArea .pp{width:210mm;height:297mm;overflow:hidden;page-break-after:always;position:relative}
+  #printArea .pp .pc{width:420px;height:594px;transform-origin:0 0;transform:scale(1.89);position:relative}
+  #printArea .pp img{width:100%;height:100%;object-fit:contain}
+  #printArea .bm{display:none}
+}
+
+@media (max-width:640px){
+  :root{--panel:100vw}
+  .arrow{width:40px}.arrow.prev{left:0}.arrow.next{right:0}
+  .zoombar{display:none}
+}
+
+/* ===== 샘플 페이지 스타일 (이미지로 교체 시 삭제 가능) ===== */
+.sp-cover{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 72%,#1f4fd1 0%,#0b2577 30%,#040a22 65%,#02040d 100%);color:#fff;padding:56px 44px}
+.sp-cover .k{font-size:12px;letter-spacing:.3em;color:#9fc0ff}
+.sp-cover h1{font-size:52px;line-height:1.08;margin-top:150px;font-weight:300}
+.sp-cover h1 b{font-weight:800}
+.sp-cover .y{margin-top:18px;font-size:13px;color:#b7c6e6}
+.sp-cover .ft{position:absolute;left:44px;bottom:44px;font-size:11px;color:#8494b8}
+.sp{position:absolute;inset:0;padding:60px 40px 48px;color:#222}
+.sp .sec{font-size:11px;letter-spacing:.25em;color:#3d8bfd;font-weight:700}
+.sp h2{font-size:28px;margin:10px 0 22px;font-weight:800;line-height:1.25}
+.sp p{font-size:13px;line-height:1.75;color:#555}
+.sp .no{position:absolute;bottom:26px;font-size:11px;color:#aaa}
+.sp.l .no{left:40px}.sp.r .no{right:40px}
+.ph{background:repeating-linear-gradient(45deg,#eef1f6,#eef1f6 8px,#e4e8ef 8px,#e4e8ef 16px);border-radius:6px;
+  display:grid;place-items:center;font-size:11px;color:#8a94a6}
+.toc button{width:100%;display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid #eee;font-size:15px;text-align:left}
+.toc button:hover{color:#3d8bfd}
+.toc button em{font-style:normal;color:#3d8bfd;font-weight:700;margin-right:12px;pointer-events:none}
+.toc button span{pointer-events:none}
+.stats{display:grid;gap:14px}
+.stats div{background:#f4f7fc;border-radius:8px;padding:20px 22px}
+.stats b{font-size:34px;color:#0d2a5c;font-weight:800}
+.stats span{display:block;font-size:12px;color:#777;margin-top:4px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.card{border:1px solid #e7eaf0;border-radius:8px;padding:16px}
+.card b{display:block;font-size:14px;margin-bottom:6px}
+.card p{font-size:12px;line-height:1.6}
+.steps li{list-style:none;display:flex;gap:14px;align-items:flex-start;margin-bottom:18px}
+.steps i{flex:none;width:30px;height:30px;border-radius:50%;background:#3d8bfd;color:#fff;font-style:normal;font-size:13px;
+  font-weight:700;display:grid;place-items:center}
+.steps b{font-size:14px}.steps p{font-size:12px;margin-top:2px}
+.back-cover{position:absolute;inset:0;background:#040a22;color:#9fb6da;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:10px;font-size:13px}
+.back-cover strong{color:#fff;font-size:22px;letter-spacing:.05em}
+</style>
+</head>
+<body>
+
+<!-- 책 영역 -->
+<div class="stage" id="stage">
+  <div class="zoomer" id="zoomer"><div class="book-wrap" id="bookWrap"><div id="book"></div></div></div>
+  <div class="pan" id="pan"></div>
+  <button class="arrow prev" id="aPrev" aria-label="이전 페이지"><svg class="ico" viewBox="0 0 24 24"><path d="M15 3l-8 9 8 9"/></svg></button>
+  <button class="arrow next" id="aNext" aria-label="다음 페이지"><svg class="ico" viewBox="0 0 24 24"><path d="M9 3l8 9-8 9"/></svg></button>
+</div>
+
+<!-- 우상단: 메뉴 열기 / 전체화면 -->
+<div class="corner">
+  <button id="bMenu" aria-label="메뉴"><svg class="ico" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+  <button class="js-full" aria-label="전체화면"><svg class="ico" viewBox="0 0 24 24"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7M4 10V4h6M20 14v6h-6M4 4l7 7M20 20l-7-7"/></svg></button>
+</div>
+
+<!-- 확대 슬라이더 -->
+<div class="zoombar">
+  <button class="zb" id="zIn" aria-label="확대">+</button>
+  <div class="track"><input type="range" id="zRange" min="100" max="250" step="10" value="100" aria-label="배율"></div>
+  <button class="zb" id="zOut" aria-label="축소">-</button>
+  <div class="pct" id="zPct">100%</div>
+</div>
+
+<!-- 사이드 메뉴 -->
+<aside class="panel" id="panel">
+  <div class="p-top">
+    <button id="bHome" aria-label="처음으로"><svg class="ico" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7M5 9.5V20h5v-6h4v6h5V9.5"/></svg></button>
+    <button class="js-full" aria-label="전체화면"><svg class="ico" viewBox="0 0 24 24"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7M4 10V4h6M20 14v6h-6M4 4l7 7M20 20l-7-7"/></svg></button>
+    <span class="p-gap"></span>
+    <button id="bClose" aria-label="닫기"><svg class="ico" viewBox="0 0 24 24" style="width:28px;height:28px"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
+  </div>
+  <form class="p-search" id="searchForm">
+    <input id="searchInput" placeholder="검색어 입력" autocomplete="off">
+    <button aria-label="검색"><svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></button>
+  </form>
+  <div class="p-body">
+    <ul class="sub" id="subSearch"></ul>
+    <ul class="menu">
+      <li><button data-view="toc"><svg class="ico" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.5M3.5 12h.5M3.5 18h.5"/></svg>목차</button>
+        <ul class="sub" id="subToc"></ul></li>
+      <li><button data-view="bm"><svg class="ico" viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4.5L6 21z"/></svg>북마크</button>
+        <ul class="sub" id="subBm"></ul></li>
+      <li><button id="bAuto"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M10 8.5l5 3.5-5 3.5z"/></svg><span>자동넘김</span></button></li>
+      <li><button id="bPrint"><svg class="ico" viewBox="0 0 24 24"><path d="M7 9V3h10v6M7 17H4v-7h16v7h-3M7 14h10v7H7z"/></svg>인쇄</button></li>
+      <li><button id="bThumb"><svg class="ico" viewBox="0 0 24 24"><rect x="4" y="4" width="6.5" height="6.5"/><rect x="13.5" y="4" width="6.5" height="6.5"/><rect x="4" y="13.5" width="6.5" height="6.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5"/></svg>썸네일</button></li>
+      <li><button id="bShare"><svg class="ico" viewBox="0 0 24 24"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4"/></svg>공유하기</button></li>
+    </ul>
+  </div>
+  <div class="pager">
+    <button id="pFirst" aria-label="처음"><svg class="ico" viewBox="0 0 24 24"><path d="M12 6l-6 6 6 6M19 6l-6 6 6 6"/></svg></button>
+    <button id="pPrev" aria-label="이전"><svg class="ico" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button>
+    <input id="pInput" inputmode="numeric" aria-label="페이지">
+    <button id="pNext" aria-label="다음"><svg class="ico" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
+    <button id="pLast" aria-label="마지막"><svg class="ico" viewBox="0 0 24 24"><path d="M5 6l6 6-6 6M12 6l6 6-6 6"/></svg></button>
+  </div>
+</aside>
+
+<!-- 썸네일 전체 보기 -->
+<div class="thumbs" id="thumbs">
+  <header><span>썸네일</span><button id="tClose" aria-label="닫기"><svg class="ico" viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></svg></button></header>
+  <div class="t-grid" id="tGrid"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div id="printArea"></div>
+
+<!-- 책장 넘김 엔진: StPageFlip (MIT) https://github.com/Nodlik/StPageFlip -->
+<script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
+<script>
+/* =========================================================
+   설정
+   - PAGES: 이미지로 교체하려면 { img: 'pages/01.jpg', text: '검색용 문구(선택)' }
+            권장 비율 1 : 1.414 (A4 세로), 예: 1240 x 1754px
+   - TOC  : 사이드 메뉴 '목차'에 나올 항목 (title, page)
+   - HOME_URL : 홈 버튼 이동 주소 (비워두면 첫 페이지로)
+   - SPREAD_MIN_WIDTH : 이 너비(px) 이상일 때만 두 쪽 펼침, 미만이면 한 쪽 보기
+   ========================================================= */
+var HOME_URL = '';
+var SPREAD_MIN_WIDTH = 1400;
+
+var TOC = [
+  { title:'회사소개', page:3 }, { title:'숫자로 보는 회사', page:4 }, { title:'핵심역량', page:5 },
+  { title:'서비스', page:6 }, { title:'포트폴리오', page:8 }, { title:'진행 프로세스', page:10 }, { title:'문의하기', page:11 }
+];
+
+var pgL = function(n, sec, title, body){ return '<div class="sp l"><div class="sec">'+sec+'</div><h2>'+title+'</h2>'+body+'<div class="no">'+n+'</div></div>'; };
+var pgR = function(n, sec, title, body){ return '<div class="sp r"><div class="sec">'+sec+'</div><h2>'+title+'</h2>'+body+'<div class="no">'+n+'</div></div>'; };
+var lorem = '<p>여기에 회사 소개 문구가 들어갑니다. 실제 콘텐츠로 교체해 사용하세요. 페이지는 HTML로 직접 작성하거나, 디자인된 이미지(JPG/PNG)로 통째로 넣을 수 있습니다.</p>';
+var tocHTML = '<div class="toc">' + TOC.map(function(t, i){
+  return '<button data-go="'+t.page+'"><span><em>'+('0'+(i+1)).slice(-2)+'</em>'+t.title+'</span><span>'+('0'+t.page).slice(-2)+'</span></button>';
+}).join('') + '</div>';
+
+var PAGES = [
+  { html:'<div class="sp-cover"><div class="k">COMPANY PROFILE 2026</div><h1>Sample<br><b>E-BOOK</b></h1><div class="y">회사소개서 샘플 페이지입니다</div><div class="ft">© 2026 YOUR BRAND All Rights Reserved.</div></div>' },
+  { html: pgL(2,'CONTENTS','목차', tocHTML) },
+  { html: pgR(3,'01 ABOUT','고객의 성장을 함께<br>설계합니다', lorem+'<div class="ph" style="height:220px;margin-top:24px">IMAGE</div>') },
+  { html: pgL(4,'02 NUMBERS','숫자로 보는 회사','<div class="stats"><div><b>00년</b><span>업력</span></div><div><b>0,000+</b><span>누적 프로젝트</span></div><div><b>00%</b><span>재계약률</span></div></div>') },
+  { html: pgR(5,'03 STRENGTH','핵심역량','<div class="grid2">'+
+      '<div class="card"><b>기획</b><p>목표와 사용자를 분석해 구조를 설계합니다.</p></div>'+
+      '<div class="card"><b>디자인</b><p>브랜드에 맞는 UI/UX를 만듭니다.</p></div>'+
+      '<div class="card"><b>퍼블리싱</b><p>웹 표준·반응형으로 구현합니다.</p></div>'+
+      '<div class="card"><b>운영</b><p>오픈 후 유지보수까지 함께합니다.</p></div></div>') },
+  { html: pgL(6,'04 SERVICE','홈페이지 제작','<div class="ph" style="height:200px;margin-bottom:20px">IMAGE</div>'+lorem) },
+  { html: pgR(7,'04 SERVICE','쇼핑몰 · 플랫폼','<div class="ph" style="height:200px;margin-bottom:20px">IMAGE</div>'+lorem) },
+  { html: pgL(8,'05 PORTFOLIO','포트폴리오','<div class="grid2"><div class="ph" style="height:120px">01</div><div class="ph" style="height:120px">02</div><div class="ph" style="height:120px">03</div><div class="ph" style="height:120px">04</div><div class="ph" style="height:120px">05</div><div class="ph" style="height:120px">06</div></div>') },
+  { html: pgR(9,'05 PORTFOLIO','포트폴리오','<div class="grid2"><div class="ph" style="height:120px">07</div><div class="ph" style="height:120px">08</div><div class="ph" style="height:120px">09</div><div class="ph" style="height:120px">10</div><div class="ph" style="height:120px">11</div><div class="ph" style="height:120px">12</div></div>') },
+  { html: pgL(10,'06 PROCESS','진행 프로세스','<ul class="steps">'+
+      '<li><i>1</i><div><b>상담 · 분석</b><p>요구사항과 목표를 정리합니다.</p></div></li>'+
+      '<li><i>2</i><div><b>기획 · 설계</b><p>사이트맵과 화면 구조를 확정합니다.</p></div></li>'+
+      '<li><i>3</i><div><b>디자인</b><p>메인·서브 시안을 진행합니다.</p></div></li>'+
+      '<li><i>4</i><div><b>개발 · 퍼블리싱</b><p>반응형으로 구현합니다.</p></div></li>'+
+      '<li><i>5</i><div><b>검수 · 오픈</b><p>테스트 후 런칭합니다.</p></div></li></ul>') },
+  { html: pgR(11,'07 CONTACT','문의하기','<p>프로젝트 상담은 아래 연락처로 문의해 주세요.</p><div class="stats" style="margin-top:22px"><div><span>TEL</span><b style="font-size:22px">02-000-0000</b></div><div><span>E-MAIL</span><b style="font-size:20px">hello@example.com</b></div></div>') },
+  { html:'<div class="back-cover"><strong>YOUR BRAND</strong><span>www.example.com</span></div>' }
+];
+
+/* ========================================================= */
+(function(){
+  var BASE_W = 420, BASE_H = 594;
+  var $ = function(id){ return document.getElementById(id); };
+  var body = document.body, stage = $('stage'), zoomer = $('zoomer'), wrap = $('bookWrap'), bookEl = $('book');
+  var total = PAGES.length, pf = null, autoTimer = null, zoom = 1, panX = 0, panY = 0, portrait = false;
+  var BM_KEY = 'ebook-bookmarks:' + location.pathname, bookmarks = [];
+  try { bookmarks = JSON.parse(localStorage.getItem(BM_KEY) || '[]'); } catch (e) {}
+
+  function inner(p){ return p.img ? '<img src="'+p.img+'" alt="">' : '<div class="pc">'+p.html+'</div>'; }
+  function pageText(p){
+    if (p.text) return p.text;
+    if (!p.html) return '';
+    var d = document.createElement('div'); d.innerHTML = p.html; return d.textContent.replace(/\s+/g, ' ').trim();
+  }
+  var TEXTS = PAGES.map(pageText);
+
+  /* ----- 페이지 생성 ----- */
+  PAGES.forEach(function(p, i){
+    var d = document.createElement('div');
+    d.className = 'page';
+    d.innerHTML = inner(p) + '<button class="bm" data-bm="'+i+'" aria-label="북마크"></button>';
+    bookEl.appendChild(d);
+  });
+
+  /* ----- 크기 계산: 넓으면 두 쪽, 좁으면 한 쪽 ----- */
+  var pageW = BASE_W;
+  // 엔진은 '책 너비 < minWidth×2' 일 때 한 쪽 보기로 바뀝니다 → 한 쪽 모드에선 minWidth를 페이지 너비로 지정
+  function minW(){ return portrait ? pageW : 1; }
+  function clearMinSize(){
+    [bookEl].concat([].slice.call(document.querySelectorAll('.stf__parent,.stf__block'))).forEach(function(el){
+      el.style.minWidth = ''; el.style.minHeight = '';
+    });
+  }
+  function layout(){
+    var W = stage.clientWidth, H = stage.clientHeight;
+    portrait = W < SPREAD_MIN_WIDTH;
+    var side = W < 640 ? 36 : W * .1;
+    var aw = W - side * 2, ah = H - 40;
+    pageW = Math.floor(Math.min(aw / (portrait ? 1 : 2), ah * BASE_W / BASE_H));
+    wrap.style.width = (pageW * (portrait ? 1 : 2)) + 'px';
+    document.documentElement.style.setProperty('--s', pageW / BASE_W);
+    if (pf) {
+      pf.getSettings().minWidth = minW();
+      clearMinSize();
+      pf.update();
+    }
+  }
+  layout();
+  window.addEventListener('resize', layout);
+
+  var startPage = 0;
+  try { var m = location.hash.match(/page=(\d+)/); if (m) startPage = Math.max(0, Math.min(total, +m[1]) - 1); } catch (e) {}
+
+  pf = new St.PageFlip(bookEl, {
+    width: BASE_W, height: BASE_H, size: 'stretch',
+    minWidth: minW(), maxWidth: 3000, minHeight: 1, maxHeight: 4000,
+    showCover: true, usePortrait: true,
+    drawShadow: true, maxShadowOpacity: .55,
+    flippingTime: 900, showPageCorners: true,
+    mobileScrollSupport: false, startPage: startPage
+  });
+  pf.loadFromHTML(bookEl.querySelectorAll('.page'));
+  clearMinSize(); pf.update();
+  // 표지도 종이처럼 말려 넘어가도록 (엔진 기본값은 딱딱한 표지)
+  try { pf.getPageCollection().pages.forEach(function(p){ p.setDensity('soft'); }); } catch (e) {}
+
+  /* ----- 현재 보이는 페이지 ----- */
+  function visible(){
+    var i = pf.getCurrentPageIndex();
+    if (pf.getOrientation() === 'portrait' || i === 0) return [i, i];
+    var a = i % 2 ? i : i - 1;
+    return [a, Math.min(a + 1, total - 1)];
+  }
+  function ui(){
+    var v = visible();
+    $('pInput').value = (v[0] === v[1] ? (v[0] + 1) : (v[0] + 1) + '-' + (v[1] + 1)) + '/' + total;
+    var first = v[0] === 0, last = v[1] >= total - 1;
+    ['pFirst','pPrev','aPrev'].forEach(function(id){ $(id).disabled = first; });
+    ['pLast','pNext','aNext'].forEach(function(id){ $(id).disabled = last; });
+    [].forEach.call($('tGrid').children, function(t, i){ t.classList.toggle('cur', i >= v[0] && i <= v[1]); });
+    if (last && autoTimer) toggleAuto(false);
+    try { history.replaceState(null, '', '#page=' + (v[0] + 1)); } catch (e) {}
+  }
+  pf.on('flip', ui);
+  pf.on('changeOrientation', ui);
+
+  function go(idx){ idx = Math.max(0, Math.min(total - 1, idx)); if (idx !== pf.getCurrentPageIndex()) pf.flip(idx); }
+  function goPage(p){ p = parseInt(p, 10); if (isNaN(p)) { ui(); return; } go(p - 1); }
+  function next(){ pf.flipNext(); }
+  function prev(){ pf.flipPrev(); }
+
+  /* ----- 페이지 안의 버튼 (목차 링크, 북마크 리본) ----- */
+  bookEl.addEventListener('click', function(e){
+    var g = e.target.closest('[data-go]');
+    if (g) { goPage(g.dataset.go); return; }
+    var b = e.target.closest('[data-bm]');
+    if (b) toggleBookmark(+b.dataset.bm);
+  });
+
+  /* ----- 북마크 ----- */
+  function pageTitle(i){
+    var d = document.createElement('div'); d.innerHTML = PAGES[i].html || '';
+    var h = d.querySelector('h1,h2'); return h ? h.textContent : (i + 1) + ' 페이지';
+  }
+  function renderBookmarks(){
+    [].forEach.call(document.querySelectorAll('.bm'), function(b){ b.classList.toggle('on', bookmarks.indexOf(+b.dataset.bm) > -1); });
+    var list = bookmarks.slice().sort(function(a, b){ return a - b; });
+    $('subBm').innerHTML = list.length ? list.map(function(i){
+      return '<li><button data-page="'+(i+1)+'"><span>'+pageTitle(i)+'</span><em>p.'+(i+1)+'</em></button></li>';
+    }).join('') : '<li class="empty">페이지 상단 리본을 눌러 북마크를 추가하세요.</li>';
+  }
+  function toggleBookmark(i){
+    var k = bookmarks.indexOf(i);
+    if (k > -1) bookmarks.splice(k, 1); else bookmarks.push(i);
+    try { localStorage.setItem(BM_KEY, JSON.stringify(bookmarks)); } catch (e) {}
+    renderBookmarks();
+    toast(k > -1 ? '북마크를 해제했습니다' : (i + 1) + '페이지를 북마크했습니다');
+  }
+
+  /* ----- 목차 ----- */
+  $('subToc').innerHTML = TOC.map(function(t){
+    return '<li><button data-page="'+t.page+'"><span>'+t.title+'</span><em>p.'+t.page+'</em></button></li>';
+  }).join('');
+
+  /* ----- 메뉴 열고 닫기 ----- */
+  function setMenu(open){ body.classList.toggle('menu-open', open); setTimeout(layout, 320); }
+  $('bMenu').onclick = function(){ setMenu(true); };
+  $('bClose').onclick = function(){ setMenu(false); };
+  [].forEach.call(document.querySelectorAll('[data-view]'), function(btn){
+    btn.onclick = function(){
+      var sub = $(btn.dataset.view === 'toc' ? 'subToc' : 'subBm');
+      var open = !sub.classList.contains('open');
+      sub.classList.toggle('open', open); btn.classList.toggle('on', open);
+    };
+  });
+  $('panel').addEventListener('click', function(e){
+    var b = e.target.closest('[data-page]');
+    if (b) { goPage(b.dataset.page); if (window.innerWidth <= 640) setMenu(false); }
+  });
+
+  /* ----- 검색 ----- */
+  $('searchForm').onsubmit = function(e){
+    e.preventDefault();
+    var q = $('searchInput').value.trim(), out = $('subSearch');
+    if (!q) { out.classList.remove('open'); return; }
+    var esc = function(s){ return s.replace(/[&<>]/g, function(c){ return { '&':'&amp;', '<':'&lt;', '>':'&gt;' }[c]; }); };
+    var hits = [];
+    TEXTS.forEach(function(t, i){
+      var at = t.toLowerCase().indexOf(q.toLowerCase());
+      if (at < 0) return;
+      var s = Math.max(0, at - 10), snip = t.substr(s, q.length + 26);
+      var k = snip.toLowerCase().indexOf(q.toLowerCase());
+      hits.push('<li><button data-page="'+(i+1)+'"><span>'+(s ? '…' : '')+esc(snip.slice(0, k))+'<mark>'+esc(snip.substr(k, q.length))+'</mark>'+esc(snip.slice(k + q.length))+'…</span><em>p.'+(i+1)+'</em></button></li>');
+    });
+    out.innerHTML = hits.length ? hits.join('') : '<li class="empty">검색 결과가 없습니다.</li>';
+    out.classList.add('open');
+  };
+
+  /* ----- 자동넘김 ----- */
+  function toggleAuto(force){
+    var on = force !== undefined ? force : !autoTimer;
+    clearInterval(autoTimer); autoTimer = null;
+    if (on) {
+      if (visible()[1] >= total - 1) { pf.turnToPage(0); ui(); }
+      autoTimer = setInterval(next, 3000);
+    }
+    $('bAuto').classList.toggle('on', !!autoTimer);
+    $('bAuto').querySelector('span').textContent = autoTimer ? '자동넘김 중지' : '자동넘김';
+  }
+  $('bAuto').onclick = function(){ toggleAuto(); };
+
+  /* ----- 인쇄 (현재 보이는 페이지) ----- */
+  $('bPrint').onclick = function(){
+    var v = visible(), html = '';
+    for (var i = v[0]; i <= v[1]; i++) html += '<div class="pp">' + inner(PAGES[i]) + '</div>';
+    $('printArea').innerHTML = html;
+    setTimeout(function(){ window.print(); }, 50);
+  };
+
+  /* ----- 썸네일 ----- */
+  $('tGrid').innerHTML = PAGES.map(function(p, i){
+    return '<div class="th" data-i="'+i+'"><div class="tp">'+inner(p)+'</div><span>'+(i+1)+'</span></div>';
+  }).join('');
+  $('tGrid').addEventListener('click', function(e){
+    var t = e.target.closest('.th'); if (!t) return;
+    $('thumbs').classList.remove('open'); go(+t.dataset.i);
+  });
+  $('bThumb').onclick = function(){
+    $('thumbs').classList.add('open');
+    var c = $('tGrid').querySelector('.cur'); if (c) c.scrollIntoView({ block:'center' });
+  };
+  $('tClose').onclick = function(){ $('thumbs').classList.remove('open'); };
+
+  /* ----- 공유 ----- */
+  $('bShare').onclick = function(){
+    var url = location.href;
+    if (navigator.share) { navigator.share({ title: document.title, url: url }).catch(function(){}); return; }
+    var done = function(){ toast('링크가 복사되었습니다'); };
+    if (navigator.clipboard) navigator.clipboard.writeText(url).then(done, function(){ toast(url); });
+    else toast(url);
+  };
+
+  var toastTimer;
+  function toast(msg){ var t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 1800); }
+
+  /* ----- 확대 ----- */
+  function setZoom(z){
+    zoom = Math.max(1, Math.min(2.5, Math.round(z * 10) / 10));
+    if (zoom === 1) panX = panY = 0;
+    stage.classList.toggle('zoomed', zoom > 1);
+    zoomer.style.transform = 'translate('+panX+'px,'+panY+'px) scale('+zoom+')';
+    $('zRange').value = Math.round(zoom * 100);
+    $('zPct').textContent = Math.round(zoom * 100) + '%';
+  }
+  $('zIn').onclick = function(){ setZoom(zoom + .1); };
+  $('zOut').onclick = function(){ setZoom(zoom - .1); };
+  $('zRange').oninput = function(){ setZoom(this.value / 100); };
+  var pan = $('pan'), down = null;
+  pan.addEventListener('pointerdown', function(e){ down = { x:e.clientX, y:e.clientY, px:panX, py:panY }; stage.classList.add('dragging'); pan.setPointerCapture(e.pointerId); });
+  pan.addEventListener('pointermove', function(e){ if (!down) return; panX = down.px + e.clientX - down.x; panY = down.py + e.clientY - down.y; setZoom(zoom); });
+  pan.addEventListener('pointerup', function(){ down = null; stage.classList.remove('dragging'); });
+  stage.addEventListener('wheel', function(e){ if (e.ctrlKey) { e.preventDefault(); setZoom(zoom + (e.deltaY < 0 ? .1 : -.1)); } }, { passive:false });
+
+  /* ----- 이동 버튼 / 키보드 ----- */
+  $('aPrev').onclick = $('pPrev').onclick = prev;
+  $('aNext').onclick = $('pNext').onclick = next;
+  $('pFirst').onclick = function(){ go(0); };
+  $('pLast').onclick = function(){ go(total - 1); };
+  $('bHome').onclick = function(){ if (HOME_URL) location.href = HOME_URL; else go(0); };
+  [].forEach.call(document.querySelectorAll('.js-full'), function(b){
+    b.onclick = function(){
+      if (!document.fullscreenElement) { if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen(); }
+      else document.exitFullscreen();
+    };
+  });
+  var pIn = $('pInput');
+  pIn.addEventListener('focus', function(){ this.value = this.value.split('/')[0].split('-')[0]; this.select(); });
+  pIn.addEventListener('keydown', function(e){ if (e.key === 'Enter') { goPage(this.value); this.blur(); } });
+  pIn.addEventListener('blur', ui);
+
+  document.addEventListener('keydown', function(e){
+    if (e.target.tagName === 'INPUT') return;
+    if (e.key === 'ArrowRight' || e.key === 'PageDown') next();
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') prev();
+    else if (e.key === 'Home') go(0);
+    else if (e.key === 'End') go(total - 1);
+    else if (e.key === 'Escape') { $('thumbs').classList.remove('open'); setZoom(1); }
+  });
+  window.addEventListener('hashchange', function(){ try { var m = location.hash.match(/page=(\d+)/); if (m) goPage(m[1]); } catch (e) {} });
+
+  renderBookmarks();
+  ui();
+})();
+</script>
+</body>
+</html>
