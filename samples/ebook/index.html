@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>E-BOOK</title>
+<title>IUX SYSTEM 회사소개서 · E-BOOK</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
 <style>
 :root{ --bg:#f2f2f2; --ink:#222; --sub:#888; --line:#e5e5e5; --accent:#4a7fd1; --panel:300px; --s:1; }
@@ -156,6 +156,43 @@ body.menu-open .panel{transform:none}
 .back-cover{position:absolute;inset:0;background:#040a22;color:#9fb6da;display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:10px;font-size:13px}
 .back-cover strong{color:#fff;font-size:22px;letter-spacing:.05em}
+
+/* ===== IUX SYSTEM 회사소개서 ===== */
+.pi{background:#e4e8ef center/cover no-repeat;border-radius:6px}
+.sp-cover.photo{background:linear-gradient(180deg,rgba(4,10,34,.25) 0%,rgba(4,10,34,.55) 45%,rgba(4,10,34,.92) 100%),url(img/cover.jpg) center/cover}
+.sp-cover.photo h1{margin-top:250px;font-size:44px}
+.sp-cover.photo .y{line-height:1.7}
+.back-cover.photo{background:linear-gradient(rgba(4,10,34,.7),rgba(4,10,34,.85)),url(img/back.jpg) center/cover}
+.sp li em,.sp .feat em{display:block;font-style:normal;font-size:10px;font-weight:700;letter-spacing:.08em;color:#3d8bfd;margin-bottom:3px}
+.biz li{list-style:none;display:flex;gap:14px;align-items:center;padding:9px 0;border-bottom:1px solid #eee}
+.biz li:first-child{padding-top:0}
+.biz .pi{flex:none;width:96px;height:62px}
+.biz b{display:block;font-size:14px}.biz p{font-size:12px;line-height:1.5}
+.feat{margin-bottom:16px}
+.feat .pi{height:128px;margin-bottom:10px}
+.feat b{display:block;font-size:15px;margin-bottom:4px}
+.feat p{font-size:12px;line-height:1.65}
+.feat3 .feat{display:flex;gap:14px;align-items:center;margin-bottom:14px}
+.feat3 .pi{flex:none;width:150px;height:112px;margin:0}
+.flow li{list-style:none;display:flex;gap:14px;align-items:center;margin-bottom:16px}
+.flow .pi{flex:none;width:120px;height:96px}
+.flow b{display:block;font-size:15px;margin-bottom:3px}.flow p{font-size:12px;line-height:1.6}
+.hist li{list-style:none;display:flex;gap:16px;padding:10px 0;border-top:1px solid #eee}
+.hist span{flex:none;width:58px;font-size:13px;font-weight:800;color:#0d2a5c}
+.hist b{display:block;font-size:13px}.hist p{font-size:12px;line-height:1.5}
+.gal{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.gal div{position:relative}
+.gal .pi{height:124px}
+.gal span{position:absolute;left:10px;bottom:8px;color:#fff;font-size:10px;font-weight:700;letter-spacing:.12em;text-shadow:0 1px 4px rgba(0,0,0,.6)}
+.news li{list-style:none;display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid #eee}
+.news li:first-child{padding-top:0}
+.news .pi{flex:none;width:96px;height:66px}
+.news b{display:block;font-size:13px;line-height:1.45}
+.notice{margin-top:18px;background:#f4f7fc;border-radius:8px;padding:14px 16px}
+.notice b{display:block;font-size:12px;color:#0d2a5c;margin-bottom:6px}
+.notice p{font-size:12px;line-height:1.7}
+.addr{margin-top:16px;font-size:11px!important;color:#888!important}
+@media print{#printArea *{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
 </style>
 </head>
 <body>
@@ -240,39 +277,63 @@ var HOME_URL = '';
 var SPREAD_MIN_WIDTH = 1400;
 
 var TOC = [
-  { title:'회사소개', page:3 }, { title:'숫자로 보는 회사', page:4 }, { title:'핵심역량', page:5 },
-  { title:'서비스', page:6 }, { title:'포트폴리오', page:8 }, { title:'진행 프로세스', page:10 }, { title:'문의하기', page:11 }
+  { title:'회사소개', page:3 }, { title:'숫자로 보는 IUX', page:4 }, { title:'사업영역', page:5 }, { title:'원스톱 프로세스', page:8 },
+  { title:'연혁', page:9 }, { title:'포트폴리오', page:10 }, { title:'미디어센터', page:12 }, { title:'문의하기', page:13 }
 ];
 
 var pgL = function(n, sec, title, body){ return '<div class="sp l"><div class="sec">'+sec+'</div><h2>'+title+'</h2>'+body+'<div class="no">'+n+'</div></div>'; };
 var pgR = function(n, sec, title, body){ return '<div class="sp r"><div class="sec">'+sec+'</div><h2>'+title+'</h2>'+body+'<div class="no">'+n+'</div></div>'; };
-var lorem = '<p>여기에 회사 소개 문구가 들어갑니다. 실제 콘텐츠로 교체해 사용하세요. 페이지는 HTML로 직접 작성하거나, 디자인된 이미지(JPG/PNG)로 통째로 넣을 수 있습니다.</p>';
+var pi = function(name, style){ return '<div class="pi" style="background-image:url(img/'+name+'.jpg);'+(style||'')+'"></div>'; };
+var feat = function(name, en, ko, desc){ return '<div class="feat">'+pi(name)+'<div><em>'+en+'</em><b>'+ko+'</b><p>'+desc+'</p></div></div>'; };
+var gal = function(items){ return '<div class="gal">' + items.map(function(t){ return '<div>'+pi(t[0])+'<span>'+t[1]+'</span></div>'; }).join('') + '</div>'; };
 var tocHTML = '<div class="toc">' + TOC.map(function(t, i){
   return '<button data-go="'+t.page+'"><span><em>'+('0'+(i+1)).slice(-2)+'</em>'+t.title+'</span><span>'+('0'+t.page).slice(-2)+'</span></button>';
 }).join('') + '</div>';
 
 var PAGES = [
-  { html:'<div class="sp-cover"><div class="k">COMPANY PROFILE 2026</div><h1>Sample<br><b>E-BOOK</b></h1><div class="y">회사소개서 샘플 페이지입니다</div><div class="ft">© 2026 YOUR BRAND All Rights Reserved.</div></div>' },
+  { html:'<div class="sp-cover photo"><div class="k">IUX SYSTEM · SINCE 1996</div><h1>공간의 가치를<br><b>짓다</b></h1><div class="y">설계부터 시공, 사후관리까지<br>건축의 모든 과정을 하나의 시스템으로 완성합니다</div><div class="ft">© 2026 IUX SYSTEM. All rights reserved.</div></div>' },
   { html: pgL(2,'CONTENTS','목차', tocHTML) },
-  { html: pgR(3,'01 ABOUT','고객의 성장을 함께<br>설계합니다', lorem+'<div class="ph" style="height:220px;margin-top:24px">IMAGE</div>') },
-  { html: pgL(4,'02 NUMBERS','숫자로 보는 회사','<div class="stats"><div><b>00년</b><span>업력</span></div><div><b>0,000+</b><span>누적 프로젝트</span></div><div><b>00%</b><span>재계약률</span></div></div>') },
-  { html: pgR(5,'03 STRENGTH','핵심역량','<div class="grid2">'+
-      '<div class="card"><b>기획</b><p>목표와 사용자를 분석해 구조를 설계합니다.</p></div>'+
-      '<div class="card"><b>디자인</b><p>브랜드에 맞는 UI/UX를 만듭니다.</p></div>'+
-      '<div class="card"><b>퍼블리싱</b><p>웹 표준·반응형으로 구현합니다.</p></div>'+
-      '<div class="card"><b>운영</b><p>오픈 후 유지보수까지 함께합니다.</p></div></div>') },
-  { html: pgL(6,'04 SERVICE','홈페이지 제작','<div class="ph" style="height:200px;margin-bottom:20px">IMAGE</div>'+lorem) },
-  { html: pgR(7,'04 SERVICE','쇼핑몰 · 플랫폼','<div class="ph" style="height:200px;margin-bottom:20px">IMAGE</div>'+lorem) },
-  { html: pgL(8,'05 PORTFOLIO','포트폴리오','<div class="grid2"><div class="ph" style="height:120px">01</div><div class="ph" style="height:120px">02</div><div class="ph" style="height:120px">03</div><div class="ph" style="height:120px">04</div><div class="ph" style="height:120px">05</div><div class="ph" style="height:120px">06</div></div>') },
-  { html: pgR(9,'05 PORTFOLIO','포트폴리오','<div class="grid2"><div class="ph" style="height:120px">07</div><div class="ph" style="height:120px">08</div><div class="ph" style="height:120px">09</div><div class="ph" style="height:120px">10</div><div class="ph" style="height:120px">11</div><div class="ph" style="height:120px">12</div></div>') },
-  { html: pgL(10,'06 PROCESS','진행 프로세스','<ul class="steps">'+
-      '<li><i>1</i><div><b>상담 · 분석</b><p>요구사항과 목표를 정리합니다.</p></div></li>'+
-      '<li><i>2</i><div><b>기획 · 설계</b><p>사이트맵과 화면 구조를 확정합니다.</p></div></li>'+
-      '<li><i>3</i><div><b>디자인</b><p>메인·서브 시안을 진행합니다.</p></div></li>'+
-      '<li><i>4</i><div><b>개발 · 퍼블리싱</b><p>반응형으로 구현합니다.</p></div></li>'+
-      '<li><i>5</i><div><b>검수 · 오픈</b><p>테스트 후 런칭합니다.</p></div></li></ul>') },
-  { html: pgR(11,'07 CONTACT','문의하기','<p>프로젝트 상담은 아래 연락처로 문의해 주세요.</p><div class="stats" style="margin-top:22px"><div><span>TEL</span><b style="font-size:22px">02-000-0000</b></div><div><span>E-MAIL</span><b style="font-size:20px">hello@example.com</b></div></div>') },
-  { html:'<div class="back-cover"><strong>YOUR BRAND</strong><span>www.example.com</span></div>' }
+  { html: pgR(3,'01 ABOUT','설계에서 시공까지,<br>하나의 시스템으로',
+      '<p>IUX시스템은 1996년부터 30년 동안 현장에서 쌓은 경험으로 설계 · 생산 · 시공 · 사후관리까지 건축의 전 과정을 하나의 시스템으로 완성합니다. 모듈러, 클린룸, 실내건축, 비정형(3D), 리모델링까지 공간의 가치를 높이는 일을 합니다.</p>'+
+      pi('about','height:230px;margin-top:22px')) },
+  { html: pgL(4,'02 NUMBERS','숫자로 보는 IUX','<div class="stats">'+
+      '<div><b>1996</b><span>설립 · IUX SYSTEM SINCE 1996</span></div>'+
+      '<div><b>30년</b><span>현장에서 쌓아온 시공 경험</span></div>'+
+      '<div><b>5개</b><span>모듈러 · 클린룸 · 실내건축 · 비정형(3D) · 리모델링</span></div>'+
+      '<div><b>원스톱</b><span>설계 → 생산 → 시공 → 사후관리</span></div></div>') },
+  { html: pgR(5,'03 OUR BUSINESS','사업영역','<ul class="biz">'+
+      '<li>'+pi('modular')+'<div><em>01 · Modular</em><b>모듈러</b><p>공장 사전제작으로 공기를 절반으로</p></div></li>'+
+      '<li>'+pi('cleanroom')+'<div><em>02 · Clean Room</em><b>클린룸</b><p>반도체·바이오 고청정 환경 구축</p></div></li>'+
+      '<li>'+pi('interior')+'<div><em>03 · Interior Architecture</em><b>실내건축</b><p>오피스부터 상업공간까지 맞춤 설계</p></div></li>'+
+      '<li>'+pi('freeform')+'<div><em>04 · Free-form(3D)</em><b>비정형(3D)</b><p>3D 모델 기반 곡면 외장 엔지니어링</p></div></li>'+
+      '<li>'+pi('remodeling')+'<div><em>05 · Remodeling</em><b>리모델링</b><p>노후 건축물의 성능과 가치 회복</p></div></li></ul>') },
+  { html: pgL(6,'03 OUR BUSINESS','모듈러 · 클린룸',
+      feat('modular','01 · Modular','모듈러','자체 공장에서 모듈을 사전 제작해 현장 공사 기간을 절반으로 줄이고, 품질 편차와 현장 위험을 낮춥니다.')+
+      feat('cleanroom','02 · Clean Room','클린룸','반도체 · 바이오 산업에 필요한 고청정 환경을 설계부터 시공까지 구축합니다.')) },
+  { html: pgR(7,'03 OUR BUSINESS','실내건축 · 비정형 · 리모델링','<div class="feat3">'+
+      feat('interior','03 · Interior','실내건축','오피스부터 상업공간까지 맞춤 설계')+
+      feat('freeform','04 · Free-form(3D)','비정형(3D)','3D 모델 기반 곡면 외장 엔지니어링')+
+      feat('remodeling','05 · Remodeling','리모델링','노후 건축물의 성능과 가치 회복')+'</div>') },
+  { html: pgL(8,'04 HOW WE BUILD','30년 현장 경험이 만든<br>원스톱 프로세스','<ul class="flow">'+
+      '<li>'+pi('design')+'<div><em>STEP 01</em><b>설계</b><p>3D 모델 기반으로 구조와 외장, 설비를 하나의 데이터로 통합 설계합니다.</p></div></li>'+
+      '<li>'+pi('production')+'<div><em>STEP 02</em><b>생산</b><p>자체 공장에서 모듈과 부재를 사전 제작해 품질 편차를 줄입니다.</p></div></li>'+
+      '<li>'+pi('build')+'<div><em>STEP 03</em><b>시공</b><p>현장 조립과 정밀 시공으로 공기를 단축하고 사후관리까지 책임집니다.</p></div></li></ul>') },
+  { html: pgR(9,'05 HISTORY','IUX시스템이<br>걸어온 길', pi('history','height:150px;margin-bottom:18px')+'<ul class="hist">'+
+      '<li><span>2025.10</span><div><b>본사 사옥 준공</b><p>IUX시스템 신사옥 준공</p></div></li>'+
+      '<li><span>2025.07</span><div><b>종합건설업 갱신</b><p>건설업 면허 갱신</p></div></li>'+
+      '<li><span>2025.05</span><div><b>평택 물류센터 준공</b><p>평택 물류센터 신축</p></div></li>'+
+      '<li><span>1996</span><div><b>IUX SYSTEM 설립</b><p>설계 · 시공 전문 기업으로 출발</p></div></li></ul>') },
+  { html: pgL(10,'06 PORTFOLIO','분야별 대표 시공 사례', gal([['pf-modular','MODULAR'],['pf-cleanroom','CLEAN ROOM'],['pf-interior','INTERIOR'],['pf-freeform','FREE-FORM'],['pf-remodeling','REMODELING'],['pf-office','DESIGN · BUILD']])) },
+  { html: pgR(11,'06 PORTFOLIO','실내건축', gal([['in1','실내건축 1'],['in2','실내건축 2'],['in3','실내건축 3'],['in4','실내건축 4'],['in5','실내건축 5'],['in6','실내건축 6']])) },
+  { html: pgL(12,'07 MEDIA','미디어센터','<ul class="news">'+
+      '<li>'+pi('news1')+'<div><em>보도자료 · 2026.09.24</em><b>데이터센터 인근 근로자 숙소, 모듈러 공법으로 3개월 만에 완공</b></div></li>'+
+      '<li>'+pi('news2')+'<div><em>시공현장 · 2026.08.11</em><b>모듈러 건축으로 완성한 복합문화공간, 도심 속 새로운 쉼터로</b></div></li>'+
+      '<li>'+pi('news3')+'<div><em>영상 · 2026.07.02</em><b>재건축 이주대란의 해법 [리모델링 특집]</b></div></li></ul>'+
+      '<div class="notice"><b>공지사항</b><p>IUX시스템 동부지사 개소 및 신규 협력사 협약 체결 안내</p><p>친환경 건축자재 인증 획득 및 적용 현장 확대</p></div>') },
+  { html: pgR(13,'08 CONTACT','문의하기','<p>설계 · 시공 상담은 아래 연락처로 문의해 주세요.</p>'+pi('contact','height:150px;margin:18px 0')+
+      '<div class="stats"><div><span>TEL</span><b style="font-size:22px">02-000-0000</b></div><div><span>FAX</span><b style="font-size:22px">02-000-0001</b></div></div>'+
+      '<p class="addr">(주)IUX시스템 · 대표이사 홍길동 · 사업자등록번호 000-00-00000<br>서울특별시 OO구 OO로 00</p>') },
+  { html:'<div class="back-cover photo"><strong>IUX SYSTEM</strong><span>공간의 가치를 짓다</span></div>' }
 ];
 
 /* ========================================================= */
