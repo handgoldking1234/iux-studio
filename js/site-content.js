@@ -44,7 +44,7 @@ window.SiteReady = (async () => {
     const arrow = '<svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>';
     const link = (p, mobile) => { const a = document.createElement('a'); a.href = 'page.html?p=' + encodeURIComponent(p.slug); a.innerHTML = (p.name || '').replace(/[<>&]/g, '') + (mobile ? arrow : ''); if (here === p.slug) a.className = 'is-on'; return a; };
     const gnb = document.querySelector('.gnb'), mnav = document.querySelector('.mmenu__nav');
-    const before = n => n && [...n.children].find(a => /notice\.html/.test(a.getAttribute('href') || ''));
+    const before = n => n && [...n.children].find(a => /#contact$/.test(a.getAttribute('href') || ''));
     tops.forEach(p => { gnb?.insertBefore(link(p), before(gnb) || null); mnav?.insertBefore(link(p, true), before(mnav) || null); });
   }
 
@@ -55,10 +55,10 @@ window.SiteReady = (async () => {
     const cur = new URLSearchParams(location.search).get('b');
     const arrow = '<svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>';
     const gnb = document.querySelector('.gnb'), mnav = document.querySelector('.mmenu__nav');
-    const before = n => n && [...n.children].find(a => /notice\.html/.test(a.getAttribute('href') || ''));
+    const before = n => n && [...n.children].find(a => /#contact$/.test(a.getAttribute('href') || ''));
     menuBoards.forEach(b => [[gnb, ''], [mnav, arrow]].forEach(([nav, ic]) => {
       if (!nav) return; const a = document.createElement('a'); a.href = (b.kind === 'faq' ? 'faq.html?b=' : 'board.html?b=') + encodeURIComponent(b.slug);
-      a.innerHTML = b.name.replace(/[<>&]/g, '') + ic; if (cur === b.slug) a.className = 'is-on'; nav.insertBefore(a, before(nav)?.nextSibling || null);
+      a.innerHTML = b.name.replace(/[<>&]/g, '') + ic; if (cur === b.slug) a.className = 'is-on'; nav.insertBefore(a, before(nav) || null);
     }));
   }
 
