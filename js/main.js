@@ -313,7 +313,8 @@
   });
 
   /* ---------- 최근 공지 ---------- */
-  if (window.IUXCloud?.ready) {
+  // content.js 의 homeNotice · homeFaq 가 false 면 메인에 표시하지 않습니다.
+  if (S.homeNotice !== false && window.IUXCloud?.ready) {
     IUXCloud.listPosts('notice', { size: 3 }).then(({ items }) => {
       if (!items.length) return;
       $('#newsList').innerHTML = items.map(p => `<li><a href="notice.html?id=${p.id}">
@@ -325,7 +326,7 @@
   }
 
   /* ---------- 자주 묻는 질문 ---------- */
-  if (window.IUXCloud?.ready) {
+  if (S.homeFaq !== false && window.IUXCloud?.ready) {
     IUXCloud.listPosts('faq', { size: 5, full: true, oldestFirst: true }).then(({ items }) => {
       if (!items.length) return;
       $('#faqList').innerHTML = items.map(x => `<li><details>
