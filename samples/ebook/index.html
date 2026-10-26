@@ -35,6 +35,9 @@ body.menu-open .stage{right:var(--panel)}
 .bm::before{content:"";position:absolute;inset:0;background:#555;clip-path:polygon(0 0,100% 0,100% 100%,50% 76%,0 100%)}
 .bm:hover{opacity:.7}
 .bm.on{opacity:1}.bm.on::before{background:var(--accent)}
+/* 왼쪽 페이지는 왼쪽 위, 오른쪽 페이지는 오른쪽 위 (본문 여백 40px에 맞춤) */
+.stf__item.--left .bm{left:calc(40px*var(--s));transform:none}
+.stf__item.--right .bm{left:auto;right:calc(40px*var(--s));transform:none}
 /* 확대 시 끌어서 이동 */
 .pan{position:absolute;inset:0;z-index:5;display:none;cursor:grab}
 .stage.zoomed .pan{display:block}
