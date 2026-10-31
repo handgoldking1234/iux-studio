@@ -79,6 +79,7 @@ window.SITE = {
     { name: '미소치과의원', cat: '병원', img: 'assets/img/work-miso-dental.jpg', link: 'samples/?s=miso-dental' },
     { name: '이음새', cat: '기업', img: 'assets/img/work-ieumsae.jpg', link: 'samples/?s=ieumsae' },
     { name: 'E-BOOK', cat: '기업', img: 'assets/img/work-ebook.jpg', link: 'samples/?s=ebook' },
+    { name: '빅트리소프트', cat: '기업', img: 'assets/img/work-bigtreesoft.jpg', link: 'samples/?s=bigtreesoft' },
     { name: '샘플 08', cat: '쇼핑몰' },
     { name: '샘플 09', cat: '병원' },
     { name: '샘플 10', cat: '병원' }
