@@ -236,4 +236,27 @@
     };
   };
   V['dlg:help'] = () => support('고객센터 문의');
+
+  /* =============== 운영 앱 (사이트 전용 관리자로 바로 들어가기) ===============
+     sites.ops.appAdmin 에 앱 주소가 있으면 메뉴가 생깁니다. 예) IUX ART → https://art.iux.kr
+     지금 로그인한 studio 계정의 토큰을 넘겨, 앱이 같은 Supabase에서 운영자인지 확인하고 로그인시킵니다. */
+  V['site:app'] = async main => {
+    const s = A.site(), url = String(s.ops?.appAdmin || '').replace(/\/$/, '');
+    if (!url) { main.innerHTML = `${A.siteHead('운영 앱', { open: false })}<div class="empty">연결된 운영 앱이 없습니다.</div>`; return; }
+    main.innerHTML = `${A.siteHead('운영 앱', { open: false })}
+      <div class="card card__pad" style="max-width:640px">
+        <h3 style="font-size:17px;margin-bottom:6px">${esc(s.name)} 관리자</h3>
+        <p class="t2" style="font-size:13px;line-height:1.7;margin-bottom:16px">공고 · 작가 선정 · 정산 · 현장 후기 · 결과 리포트처럼 ${esc(s.name)}에만 있는 업무는 전용 관리자에서 처리합니다.<br>지금 studio 계정으로 바로 로그인돼요. (운영자 계정만)</p>
+        <div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn btn--primary" id="appOpen">${I('ext', 'i--sm')} ${esc(s.name)} 관리자 열기</button><a class="btn btn--line" href="${esc(url)}" target="_blank" rel="noopener">홈페이지 보기</a></div>
+        <p class="t3" style="font-size:12px;margin-top:14px">${esc(url)}/admin</p>
+      </div>`;
+    $('#appOpen').onclick = async () => {
+      const w = window.open('about:blank', '_blank');
+      const { data } = await A.sb.auth.getSession();
+      const t = data?.session?.access_token;
+      if (!t) { w?.close(); return A.toast('다시 로그인해 주세요.', true); }
+      const target = `${url}/admin/sso.html#t=${encodeURIComponent(t)}`;
+      if (w) w.location.href = target; else location.href = target;
+    };
+  };
 })();
