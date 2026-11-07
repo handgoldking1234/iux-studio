@@ -71,7 +71,8 @@ export async function handle(req: Request, env: Env, fx: typeof fetch = fetch): 
   };
   const errors: string[] = [];
   if (!row.name) errors.push('name');
-  if (!isEmail(row.email)) errors.push('email');
+  // 이메일은 전화번호가 있으면 선택 (출장 행사 문의는 전화 위주) — 적었다면 형식은 확인
+  if (row.email ? !isEmail(row.email) : !row.phone) errors.push('email');
   if (kind === 'quote' && !row.phone) errors.push('phone');
   if (kind === 'email' && !row.subject) errors.push('subject');
   if (errors.length) return json(400, { ok: false, error: 'invalid_fields', fields: errors }, origin);
@@ -111,11 +112,11 @@ export async function handle(req: Request, env: Env, fx: typeof fetch = fetch): 
       <table style="width:100%;border-collapse:collapse;font-size:14px">${rows.filter(r => r[1]).map(([k, v]) =>
         `<tr><th style="text-align:left;width:120px;padding:8px;border-bottom:1px solid #eee;color:#666;font-weight:600">${esc(k)}</th><td style="padding:8px;border-bottom:1px solid #eee">${esc(v)}</td></tr>`).join('')}</table>
       ${row.message ? `<p style="margin:20px 0 6px;color:#666;font-size:13px;font-weight:600">문의 내용</p><div style="white-space:pre-wrap;font-size:14px;line-height:1.6;padding:14px;background:#f6f7f9;border-radius:6px">${esc(row.message)}</div>` : ''}
-      <p style="margin-top:24px;font-size:12px;color:#999">이 메일에 답장하면 문의자(${esc(row.email)})에게 전달됩니다.</p></div>`;
+      <p style="margin-top:24px;font-size:12px;color:#999">${row.email ? `이 메일에 답장하면 문의자(${esc(row.email)})에게 전달됩니다.` : '문의자가 이메일을 남기지 않았어요. 연락처로 연락해 주세요.'}</p></div>`;
     try {
       const mr = await fx('https://api.resend.com/emails', {
         method: 'POST', headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ from: env.MAIL_FROM, to: to.length ? to : cc, cc: to.length && cc.length ? cc : undefined, reply_to: row.email, subject, html }),
+        body: JSON.stringify({ from: env.MAIL_FROM, to: to.length ? to : cc, cc: to.length && cc.length ? cc : undefined, reply_to: row.email || undefined, subject, html }),
       });
       notified = mr.ok;
       if (!mr.ok) console.error('mail failed', mr.status, await mr.text());

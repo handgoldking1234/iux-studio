@@ -165,3 +165,17 @@ cloud: { url: 'https://abcdefgh.supabase.co', anonKey: 'eyJ...', siteId: 'iux-st
    - 홈페이지 주소: `board.html?b=게시판주소`
 
 방문자 글은 이름 · 비밀번호로 쓰고 같은 비밀번호로 수정 · 삭제합니다. 관리자는 **게시판** 메뉴에서 모든 글 · 댓글을 숨기거나 삭제하고 관리자 답글을 달 수 있습니다.
+
+---
+
+## 사이트 전용 운영 앱 연결 (예: IUX ART)
+
+홈페이지 외에 자체 관리자(공고·정산 등)가 있는 사이트는 사이트 메뉴 **운영 → 운영 앱**에서 studio 계정으로 바로 들어갈 수 있습니다.
+
+1. `sites.ops.appAdmin` 에 앱 주소를 넣습니다. IUX ART는 `supabase/migrations/20261107010000_iux_art.sql` 을 SQL Editor 에서 실행하면 등록까지 끝납니다.
+2. 앱 쪽은 같은 Supabase 로 토큰을 확인하고, `public.admins` 에 있는 운영자만 들여보냅니다.
+3. 앱 데이터는 앱 전용 스키마(IUX ART는 `iuxart`)에 두어 IUX Cloud 표와 섞이지 않게 합니다.
+
+> 문의 함수(`inquiry`)는 **전화번호가 있으면 이메일 없이도** 접수되도록 바뀌었습니다. (출장 행사 문의는 전화 위주)
+> Edge Functions → inquiry → Code 에 `supabase/functions/inquiry/index.ts` 새 내용을 붙여넣고 다시 **Deploy** 하세요.
+

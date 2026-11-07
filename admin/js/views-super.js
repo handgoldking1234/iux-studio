@@ -125,7 +125,7 @@
       foot: `<button class="btn" data-x>취소</button><button class="btn btn--primary" data-save>저장</button>` });
     m.el.querySelector('[data-save]').onclick = async () => {
       const g = n => m.el.querySelector(`[name=${n}]`);
-      const ops = { registrar: g('registrar').value.trim(), domainExp: g('domainExp').value, host: g('host').value.trim(), hostPlan: g('hostPlan').value.trim(), hostExp: g('hostExp').value, ssl: g('ssl').value, cost: +g('cost').value || 0, owner: g('owner').value, auto: g('auto').checked };
+      const ops = { ...(s.ops || {}), registrar: g('registrar').value.trim(), domainExp: g('domainExp').value, host: g('host').value.trim(), hostPlan: g('hostPlan').value.trim(), hostExp: g('hostExp').value, ssl: g('ssl').value, cost: +g('cost').value || 0, owner: g('owner').value, auto: g('auto').checked };
       const domain = g('domain').value.trim().replace(/^https?:\/\//, '').replace(/\/+$/, '') || null;
       const { error } = await A.sb.from('sites').update({ ops, domain }).eq('id', id);
       if (error) return A.fail(error);
