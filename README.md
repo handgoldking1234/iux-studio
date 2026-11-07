@@ -42,3 +42,6 @@ python3 -m http.server 8000   # http://localhost:8000, 관리자: /admin/
 2. `web3formsKey` → Web3Forms
 3. `formEndpoint` → Formspree 등
 4. 모두 비어 있음 → 메일 앱(mailto)
+
+## 이어서 작업하기
+결정사항·코드 지도·수정 방법은 [CLAUDE.md](CLAUDE.md), 전체 프로젝트 목록은 [IUX 프로젝트 목록](https://github.com/handgoldking1234/iux-app/blob/main/docs/PROJECTS.md)에 있습니다.
