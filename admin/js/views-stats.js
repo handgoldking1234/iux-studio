@@ -50,11 +50,11 @@
     const name = namer(c), dv = devices(c);
     const exits = (c.pages || []).filter(x => x.views >= 1).map(x => ({ ...x, rate: A.pct(x.exits, x.views) })).sort((a, b) => b.rate - a.rate).slice(0, 4);
     return `${noData(c)}<div class="grid g5" style="margin-bottom:24px">
-      ${A.kpi('방문자', A.n(c.visitors), 'users', A.delta(c.visitors, p.visitors))}
-      ${A.kpi('페이지뷰', A.n(c.pageviews), 'eye', A.delta(c.pageviews, p.pageviews))}
-      ${A.kpi('평균 체류시간', A.dur(c.avg_ms).replace(/^0분 /, ''), 'clock', A.delta(c.avg_ms, p.avg_ms))}
-      ${A.kpi('이탈률', c.bounce + '%', 'exit', p.visitors ? A.delta(c.bounce, p.bounce, '%p', true) : '')}
-      ${A.kpi('상담 문의', A.n(c.inquiries) + '건', 'inq', A.delta(c.inquiries, p.inquiries))}</div>
+      ${A.kpi('방문자', A.n(c.visitors), 'users', A.delta(c.visitors, p.visitors), '', A.siteHash('traffic'))}
+      ${A.kpi('페이지뷰', A.n(c.pageviews), 'eye', A.delta(c.pageviews, p.pageviews), '', A.siteHash('exit'))}
+      ${A.kpi('평균 체류시간', A.dur(c.avg_ms).replace(/^0분 /, ''), 'clock', A.delta(c.avg_ms, p.avg_ms), '', A.siteHash('exit'))}
+      ${A.kpi('이탈률', c.bounce + '%', 'exit', p.visitors ? A.delta(c.bounce, p.bounce, '%p', true) : '', '', A.siteHash('exit'))}
+      ${A.kpi('상담 문의', A.n(c.inquiries) + '건', 'inq', A.delta(c.inquiries, p.inquiries), '', A.siteHash('inq'))}</div>
       <div class="card card__pad" style="margin-bottom:24px"><div class="card__h"><h2>방문자 추이</h2><small>막대에 올리면 날짜별 수치</small></div>${chart(c)}</div>
       <div class="grid g3" style="gap:16px">
         <div class="card card__pad"><div class="card__h"><h2>유입 경로</h2></div>${A.barsHTML(srcRows(c))}</div>

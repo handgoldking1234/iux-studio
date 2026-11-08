@@ -355,7 +355,7 @@
   };
 
   /* ---------- 공통 화면 조각 ---------- */
-  A.kpi = (label, value, ic, sub = '', cls = '') => `<div class="card kpi"><div><p>${label}</p><b class="${cls}">${value}</b>${sub ? `<small>${sub}</small>` : ''}</div><span class="kpi__ic">${I(ic)}</span></div>`;
+  A.kpi = (label, value, ic, sub = '', cls = '', href = '') => { const t = href ? 'a' : 'div'; return `<${t} class="card kpi${href ? ' kpi--link' : ''}"${href ? ` href="${href}" title="${label} 자세히 보기"` : ''}><div><p>${label}</p><b class="${cls}">${value}</b>${sub ? `<small>${sub}</small>` : ''}</div><span class="kpi__ic">${I(ic)}</span></${t}>`; };
   A.delta = (cur, prev, unit = '%', invert = false) => {
     if (!prev && !cur) return '';
     if (!prev) return '<em>신규</em> 이전 기간 데이터 없음';
