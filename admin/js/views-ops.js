@@ -222,7 +222,16 @@
         <div class="card card__pad svc"><div class="row row--sb"><span class="t2" style="font-size:13px;font-weight:700">도메인</span><span class="dday ${d1.c}">${d1.t}</span></div><h3>${esc(s.domain || '-')}</h3><div class="kv"><div><span>등록기관</span><b>${esc(o.registrar || '-')}</b></div><div><span>만료일</span><b>${A.dot(o.domainExp)}</b></div><div><span>연장 방식</span><b>${o.auto ? '자동 연장' : '수동 연장'}</b></div></div></div>
         <div class="card card__pad svc"><div class="row row--sb"><span class="t2" style="font-size:13px;font-weight:700">호스팅</span><span class="dday ${d2.c}">${d2.t}</span></div><h3>${esc([o.host, o.hostPlan].filter(Boolean).join(' ') || '-')}</h3><div class="kv"><div><span>만료일</span><b>${A.dot(o.hostExp)}</b></div><div><span>월 비용</span><b>${o.cost ? A.n(o.cost) + '원' : '-'}</b></div><div><span>명의</span><b>${o.owner === 'client' ? '고객' : o.owner ? '스튜디오' : '-'}</b></div></div></div>
         <div class="card card__pad svc"><div class="row row--sb"><span class="t2" style="font-size:13px;font-weight:700">SSL 보안 인증서</span><span class="dday is-neg">${ssl[1]}</span></div><h3>${ssl[0]}</h3><div class="kv"><div><span>적용 주소</span><b>${s.domain ? 'https://' + esc(s.domain) : '-'}</b></div></div></div></div>
+      <form class="card card__pad stack" id="nf" style="gap:12px;margin-bottom:16px"><div><b style="font-size:16px">문의 알림 메일</b><p class="t2" style="font-size:13px;margin-top:4px">홈페이지에 견적·문의가 들어오면 이 주소로 알림 메일을 보내 드려요. 여러 개는 쉼표나 줄바꿈으로 구분합니다.</p></div><textarea name="emails" rows="2" class="inp" placeholder="name@company.com">${esc((s.notify_emails || []).join(', '))}</textarea><div class="row" style="justify-content:flex-end"><button class="btn btn--primary">저장</button></div></form>
       <div class="card card__pad row row--sb"><div><b style="font-size:16px">연장이나 변경이 필요하신가요?</b><p class="t2" style="font-size:13px;margin-top:4px">도메인 · 호스팅 연장과 상품 변경은 IUX.studio에서 대신 처리해 드립니다.</p></div><button class="btn btn--primary" id="req">연장 요청하기</button></div>`;
+    $('#nf').addEventListener('submit', async e => {
+      e.preventDefault();
+      const list = e.target.emails.value.split(/[\s,;]+/).map(x => x.trim()).filter(Boolean);
+      const bad = list.find(m => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(m)); if (bad) return A.toast(`메일 주소를 확인해 주세요: ${bad}`, true);
+      const { error } = await A.sb.from('sites').update({ notify_emails: list }).eq('id', s.id);
+      if (error) return A.fail(error, '저장하지 못했습니다.');
+      s.notify_emails = list; A.toast('알림 메일을 저장했습니다.');
+    });
     $('#req').onclick = () => support('연장 요청', `도메인 · 호스팅 연장을 요청합니다.\n도메인: ${s.domain || '-'} (만료 ${A.dot(o.domainExp)})\n호스팅: ${o.host || '-'} (만료 ${A.dot(o.hostExp)})`);
   };
   const support = (kind, msg = '') => {
